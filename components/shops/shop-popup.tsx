@@ -1,6 +1,11 @@
-import { PhoneIcon } from "@/components/icons/app-icons"
+import {
+  CylinderIcon,
+  ExchangeIcon,
+  PhoneIcon,
+} from "@/components/icons/app-icons"
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
+import { getGoogleMapsDirectionsUrl } from "@/lib/maps"
 import type { UiShop } from "@/types"
 
 import { AvailabilityBadge } from "./availability-badge"
@@ -28,10 +33,16 @@ export function ShopPopup({ dictionary, shop }: ShopPopupProps) {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <AvailabilityBadge available={shop.exchange}>
+        <AvailabilityBadge
+          available={shop.exchange}
+          icon={<ExchangeIcon className="size-3.5" />}
+        >
           {dictionary.exchange}
         </AvailabilityBadge>
-        <AvailabilityBadge available={shop.newCylinder}>
+        <AvailabilityBadge
+          available={shop.newCylinder}
+          icon={<CylinderIcon className="size-3.5" />}
+        >
           {dictionary.newCylinder}
         </AvailabilityBadge>
       </div>
@@ -62,7 +73,13 @@ export function ShopPopup({ dictionary, shop }: ShopPopupProps) {
             </Button>
           ) : null}
           <Button asChild className="px-4">
-            <a href="#directions">{dictionary.directions}</a>
+            <a
+              href={getGoogleMapsDirectionsUrl(shop)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {dictionary.directions}
+            </a>
           </Button>
         </div>
       </div>

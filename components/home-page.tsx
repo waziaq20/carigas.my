@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { SiteHeader } from "@/components/layout/site-header"
 import { ShopInsights } from "@/components/shops/shop-insights"
@@ -21,16 +21,108 @@ type HomePageProps = {
   locale: Locale
 }
 
+type ShopsResponse = {
+  shops: UiShop[]
+}
+
+async function fetchNearbyShops(locale: Locale, location: Coordinates) {
+  const searchParams = new URLSearchParams({
+    lat: String(location.lat),
+    lng: String(location.lng),
+    locale,
+  })
+  const response = await fetch(`/api/shops?${searchParams.toString()}`)
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch nearby shops")
+  }
+
+  const data = (await response.json()) as ShopsResponse
+
+  return data.shops
+}
+
+function getLocationFromPosition(position: GeolocationPosition): Coordinates {
+  return {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+  }
+}
+
 export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
   const [view, setView] = useState<ShopViewMode>("map")
   const [shops, setShops] = useState(initialShops)
   const [selectedShop, setSelectedShop] = useState<UiShop | null>(
     initialShops[0] ?? null
   )
+  const hasRequestedInitialLocation = useRef(false)
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null)
   const [isLocating, setIsLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const lowestPrice = getLowestShopPrice(shops)
+  const nearestDistance = userLocation
+    ? (shops[0]?.distance ?? dictionary.distanceUnavailable)
+    : dictionary.distanceUnavailable
+
+  useEffect(() => {
+    if (hasRequestedInitialLocation.current) {
+      return
+    }
+
+    hasRequestedInitialLocation.current = true
+
+    if (!navigator.geolocation) {
+      return
+    }
+
+    let cancelled = false
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const location = getLocationFromPosition(position)
+
+        try {
+          const sortedShops = await fetchNearbyShops(locale, location)
+
+          if (cancelled) {
+            return
+          }
+
+          setUserLocation(location)
+          setShops(sortedShops)
+          setSelectedShop(sortedShops[0] ?? null)
+        } catch {
+          const sortedShops = sortShopsByDistance(initialShops, location)
+
+          if (cancelled) {
+            return
+          }
+
+          setUserLocation(location)
+          setShops(sortedShops)
+          setSelectedShop(sortedShops[0] ?? null)
+        } finally {
+          if (!cancelled) {
+            setIsLocating(false)
+          }
+        }
+      },
+      () => {
+        if (!cancelled) {
+          setIsLocating(false)
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 30000,
+        timeout: 10000,
+      }
+    )
+
+    return () => {
+      cancelled = true
+    }
+  }, [initialShops, locale])
 
   function handleLocate() {
     if (!navigator.geolocation) {
@@ -42,22 +134,19 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
     setLocationError(null)
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+      async (position) => {
+        const location = getLocationFromPosition(position)
+        let sortedShops: UiShop[]
+
+        try {
+          sortedShops = await fetchNearbyShops(locale, location)
+        } catch {
+          sortedShops = sortShopsByDistance(shops, location)
         }
-        const sortedShops = sortShopsByDistance(shops, location)
 
         setUserLocation(location)
         setShops(sortedShops)
-        setSelectedShop((currentShop) =>
-          currentShop
-            ? (sortedShops.find((shop) => shop.id === currentShop.id) ??
-              sortedShops[0] ??
-              null)
-            : (sortedShops[0] ?? null)
-        )
+        setSelectedShop(sortedShops[0] ?? null)
         setIsLocating(false)
       },
       () => {
@@ -112,6 +201,7 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
             <ShopSummary
               dictionary={dictionary}
               lowestPrice={lowestPrice}
+              nearestDistance={nearestDistance}
               shopCount={shops.length}
             />
             <ShopInsights
@@ -126,6 +216,7 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
           <ShopSummary
             dictionary={dictionary}
             lowestPrice={lowestPrice}
+            nearestDistance={nearestDistance}
             shopCount={shops.length}
           />
           <ShopInsights

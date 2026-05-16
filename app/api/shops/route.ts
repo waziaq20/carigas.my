@@ -1,26 +1,50 @@
+import { defaultLocale, getDictionary, isLocale } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
+import { mapShopToUiShop, sortShopsByDistance } from "@/lib/shops"
+import type { Coordinates } from "@/types"
 
 import { parseShopCreateInput } from "./validation"
 
-export async function GET() {
+function parseLocation(searchParams: URLSearchParams): Coordinates | null {
+  const lat = Number(searchParams.get("lat"))
+  const lng = Number(searchParams.get("lng"))
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null
+  }
+
+  return { lat, lng }
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url)
+  const localeParam = url.searchParams.get("locale")
+  const locale =
+    localeParam && isLocale(localeParam) ? localeParam : defaultLocale
+  const dictionary = getDictionary(locale)
+  const userLocation = parseLocation(url.searchParams)
+
   try {
     const shops = await prisma.shop.findMany({
       where: {
         approved: true,
       },
       orderBy: {
-        createdAt: "desc",
+        name: "asc",
       },
     })
+    const uiShops = shops.map((shop) =>
+      mapShopToUiShop(shop, dictionary.distanceUnavailable)
+    )
+    const sortedShops = userLocation
+      ? sortShopsByDistance(uiShops, userLocation)
+      : uiShops
 
-    return Response.json({ shops })
+    return Response.json({ shops: sortedShops })
   } catch (error) {
     console.error("Failed to fetch shops", error)
 
-    return Response.json(
-      { error: "Failed to fetch shops" },
-      { status: 500 },
-    )
+    return Response.json({ error: "Failed to fetch shops" }, { status: 500 })
   }
 }
 
@@ -32,7 +56,7 @@ export async function POST(request: Request) {
   } catch {
     return Response.json(
       { error: "Request body must be valid JSON" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -44,7 +68,7 @@ export async function POST(request: Request) {
         error: "Invalid shop data",
         issues: result.errors,
       },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -57,9 +81,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Failed to create shop", error)
 
-    return Response.json(
-      { error: "Failed to create shop" },
-      { status: 500 },
-    )
+    return Response.json({ error: "Failed to create shop" }, { status: 500 })
   }
 }

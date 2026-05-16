@@ -121,6 +121,54 @@ export function PhoneIcon({ className }: IconProps) {
   )
 }
 
+export function ExchangeIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M7 7h9.5a3.5 3.5 0 0 1 0 7H6m0 0 3-3m-3 3 3 3M17 17H7.5a3.5 3.5 0 0 1 0-7H18m0 0-3-3m3 3-3 3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function CylinderIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M9 5h6M10 5V3h4v2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 10c0-2.2 1.8-4 4-4h2c2.2 0 4 1.8 4 4v7a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-7Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M9.5 13h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function CheckIcon({ className }: IconProps) {
   return (
     <svg

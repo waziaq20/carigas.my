@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 type ShopSummaryProps = {
   dictionary: Dictionary
   lowestPrice: string | null
+  nearestDistance: string
   shopCount: number
 }
 
@@ -29,6 +30,7 @@ function Metric({ className, value, label }: MetricProps) {
 export function ShopSummary({
   dictionary,
   lowestPrice,
+  nearestDistance,
   shopCount,
 }: ShopSummaryProps) {
   return (
@@ -50,7 +52,7 @@ export function ShopSummary({
         />
         <Metric
           className="col-span-2"
-          value="Selangor"
+          value={nearestDistance}
           label={dictionary.metricNearest}
         />
         <Metric

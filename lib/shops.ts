@@ -22,7 +22,10 @@ export function formatShopPrice(price: number | null) {
   }).format(price / 100)
 }
 
-export function mapShopToUiShop(shop: ShopRecord): UiShop {
+export function mapShopToUiShop(
+  shop: ShopRecord,
+  distanceLabel: string
+): UiShop {
   const left =
     ((shop.lng - mapBounds.minLng) / (mapBounds.maxLng - mapBounds.minLng)) *
       70 +
@@ -36,7 +39,7 @@ export function mapShopToUiShop(shop: ShopRecord): UiShop {
     id: shop.id,
     name: shop.name,
     address: shop.address,
-    distance: "Selangor",
+    distance: distanceLabel,
     price: formatShopPrice(shop.price),
     priceValue: shop.price,
     phone: shop.phone,

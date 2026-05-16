@@ -61,7 +61,7 @@ export function ShopMapView({
 
       <div className="absolute top-4 left-4 z-20 border border-border bg-card p-3 text-card-foreground shadow-sm">
         <p className="text-[0.65rem] font-bold tracking-[0.18em] text-muted-foreground uppercase">
-          {dictionary.nearbyArea}
+          {dictionary.currentResults}
         </p>
         <p className="mt-1 text-sm font-black text-foreground">
           {shops.length} {dictionary.metricShops}

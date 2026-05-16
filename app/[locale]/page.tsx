@@ -144,7 +144,10 @@ export default async function Page({
       name: "asc",
     },
   })
-  const uiShops = shops.map(mapShopToUiShop)
+  const dictionary = getDictionary(locale)
+  const uiShops = shops.map((shop) =>
+    mapShopToUiShop(shop, dictionary.distanceUnavailable)
+  )
 
   return (
     <>
@@ -155,7 +158,7 @@ export default async function Page({
         }}
       />
       <HomePage
-        dictionary={getDictionary(locale)}
+        dictionary={dictionary}
         initialShops={uiShops}
         locale={locale}
       />

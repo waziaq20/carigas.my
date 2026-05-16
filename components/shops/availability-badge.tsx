@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils"
 type AvailabilityBadgeProps = {
   available: boolean
   children: ReactNode
+  icon?: ReactNode
 }
 
 export function AvailabilityBadge({
   available,
   children,
+  icon,
 }: AvailabilityBadgeProps) {
   return (
     <span
@@ -21,11 +23,12 @@ export function AvailabilityBadge({
           : "bg-destructive/10 text-destructive"
       )}
     >
-      {available ? (
-        <CheckIcon className="size-3.5" />
-      ) : (
-        <XIcon className="size-3.5" />
-      )}
+      {icon ??
+        (available ? (
+          <CheckIcon className="size-3.5" />
+        ) : (
+          <XIcon className="size-3.5" />
+        ))}
       {children}
     </span>
   )

@@ -2,14 +2,7 @@
 
 import L from "leaflet"
 import { useEffect } from "react"
-import {
-  CircleMarker,
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMap,
-} from "react-leaflet"
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet"
 
 import type { Coordinates, UiShop } from "@/types"
 
@@ -37,14 +30,49 @@ function getMapCenter(shops: UiShop[]): [number, number] {
   return [totals.lat / shops.length, totals.lng / shops.length]
 }
 
-function createShopIcon(selected: boolean) {
+function createCapabilityIcon(active: boolean, path: string) {
+  return `<span class="carigas-shop-marker__capability ${
+    active ? "is-active" : ""
+  }" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="${path}" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>`
+}
+
+function createShopIcon(shop: UiShop, selected: boolean) {
+  const selectedClass = selected ? " is-selected" : ""
+  const priceBadge = shop.price
+    ? `<span class="carigas-shop-marker__price">${shop.price}</span>`
+    : ""
+
   return L.divIcon({
     className: "",
-    html: `<span class="block size-9 rounded-full border-4 border-background ${
-      selected ? "bg-primary" : "bg-foreground"
-    } shadow-sm ring-2 ring-background"></span>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
+    html: `<div class="carigas-shop-marker${selectedClass}">
+      ${priceBadge}
+      <span class="carigas-shop-marker__pin" aria-hidden="true">
+        <span class="carigas-shop-marker__flame"></span>
+      </span>
+      <span class="carigas-shop-marker__capabilities">
+        ${createCapabilityIcon(
+          shop.exchange,
+          "M7 7h9.5a3.5 3.5 0 0 1 0 7H6m0 0 3-3m-3 3 3 3M17 17H7.5a3.5 3.5 0 0 1 0-7H18m0 0-3-3m3 3-3 3"
+        )}
+        ${createCapabilityIcon(
+          shop.newCylinder,
+          "M9 5h6M10 5V3h4v2M7 10c0-2.2 1.8-4 4-4h2c2.2 0 4 1.8 4 4v7a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4v-7ZM9.5 13h5"
+        )}
+      </span>
+    </div>`,
+    iconSize: [76, 70],
+    iconAnchor: [38, 42],
+    popupAnchor: [0, -42],
+  })
+}
+
+function createUserLocationIcon() {
+  return L.divIcon({
+    className: "",
+    html: `<span class="carigas-user-marker" aria-hidden="true"><span></span></span>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -16],
   })
 }
 
@@ -77,8 +105,11 @@ export default function ShopMap({
     <MapContainer
       center={getMapCenter(shops)}
       zoom={9}
-      scrollWheelZoom={false}
-      className="z-0 h-full min-h-[inherit] w-full bg-muted"
+      scrollWheelZoom
+      touchZoom
+      doubleClickZoom
+      keyboard
+      className="carigas-map z-0 h-full min-h-[inherit] w-full bg-muted"
     >
       <MapCenterUpdater userLocation={userLocation} />
 
@@ -88,17 +119,13 @@ export default function ShopMap({
       />
 
       {userLocation ? (
-        <CircleMarker
-          center={[userLocation.lat, userLocation.lng]}
-          radius={8}
-          pathOptions={{
-            color: "var(--primary)",
-            fillColor: "var(--primary)",
-            fillOpacity: 0.9,
-          }}
+        <Marker
+          icon={createUserLocationIcon()}
+          position={[userLocation.lat, userLocation.lng]}
+          title={myLocationLabel}
         >
           <Popup>{myLocationLabel}</Popup>
-        </CircleMarker>
+        </Marker>
       ) : null}
 
       {shops.map((shop) => (
@@ -107,17 +134,10 @@ export default function ShopMap({
           eventHandlers={{
             click: () => onSelectShop(shop),
           }}
-          icon={createShopIcon(selectedShop?.id === shop.id)}
+          icon={createShopIcon(shop, selectedShop?.id === shop.id)}
           position={[shop.lat, shop.lng]}
-        >
-          <Popup>
-            <div className="space-y-1">
-              <p className="font-bold">{shop.name}</p>
-              <p>{shop.address}</p>
-              {shop.price ? <p>{shop.price}</p> : null}
-            </div>
-          </Popup>
-        </Marker>
+          title={shop.name}
+        />
       ))}
     </MapContainer>
   )

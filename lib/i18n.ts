@@ -30,7 +30,7 @@ const dictionaries = {
     pageTitle: "Kedai gas berhampiran anda",
     map: "Map",
     list: "Senarai",
-    nearbyArea: "Sekitar Shah Alam",
+    currentResults: "Keputusan semasa",
     shopsFound: "4 kedai ditemui",
     listTitle: "Senarai kedai",
     sortDescription:
@@ -50,6 +50,7 @@ const dictionaries = {
     metricShops: "kedai",
     metricNearest: "terdekat",
     metricFrom: "mula",
+    distanceUnavailable: "Jarak belum tersedia",
     insightsLabel: "Data kedai",
     insightsTitle: "Kualiti senarai semasa",
     insightsDescription:
@@ -78,7 +79,7 @@ const dictionaries = {
     pageTitle: "Gas shops near you",
     map: "Map",
     list: "List",
-    nearbyArea: "Around Shah Alam",
+    currentResults: "Current results",
     shopsFound: "4 shops found",
     listTitle: "Shop list",
     sortDescription:
@@ -98,6 +99,7 @@ const dictionaries = {
     metricShops: "shops",
     metricNearest: "nearest",
     metricFrom: "from",
+    distanceUnavailable: "Distance unavailable",
     insightsLabel: "Shop data",
     insightsTitle: "Current listing quality",
     insightsDescription: "A quick summary based on the shops currently shown.",
@@ -125,7 +127,7 @@ const dictionaries = {
     pageTitle: "你附近的煤气店",
     map: "地图",
     list: "列表",
-    nearbyArea: "莎阿南附近",
+    currentResults: "当前结果",
     shopsFound: "找到 4 间店铺",
     listTitle: "店铺列表",
     sortDescription: "按最近距离排序。如果未允许定位，则按字母顺序排序。",
@@ -144,6 +146,7 @@ const dictionaries = {
     metricShops: "店铺",
     metricNearest: "最近",
     metricFrom: "起",
+    distanceUnavailable: "距离未启用",
     insightsLabel: "店铺数据",
     insightsTitle: "当前列表质量",
     insightsDescription: "根据当前显示的店铺快速汇总。",
@@ -169,7 +172,7 @@ const dictionaries = {
     pageTitle: "உங்களுக்கு அருகிலுள்ள எரிவாயு கடைகள்",
     map: "வரைபடம்",
     list: "பட்டியல்",
-    nearbyArea: "ஷா ஆலம் சுற்றில்",
+    currentResults: "தற்போதைய முடிவுகள்",
     shopsFound: "4 கடைகள் கிடைத்தன",
     listTitle: "கடை பட்டியல்",
     sortDescription:
@@ -189,6 +192,7 @@ const dictionaries = {
     metricShops: "கடைகள்",
     metricNearest: "அருகில்",
     metricFrom: "முதல்",
+    distanceUnavailable: "தூரம் கிடைக்கவில்லை",
     insightsLabel: "கடை தரவு",
     insightsTitle: "தற்போதைய பட்டியல் தரம்",
     insightsDescription:
