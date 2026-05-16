@@ -1,0 +1,186 @@
+export const locales = ["ms", "en", "zh", "ta"] as const
+
+export type Locale = (typeof locales)[number]
+
+export const defaultLocale: Locale = "ms"
+
+export const localeLabels: Record<Locale, string> = {
+  ms: "BM",
+  en: "EN",
+  zh: "中文",
+  ta: "தமிழ்",
+}
+
+export function isLocale(value: string): value is Locale {
+  return locales.includes(value as Locale)
+}
+
+export function getDictionary(locale: Locale) {
+  return dictionaries[locale]
+}
+
+export type Dictionary = (typeof dictionaries)[Locale]
+
+const dictionaries = {
+  ms: {
+    appTagline: "Gas terdekat sekarang",
+    myLocation: "Lokasi saya",
+    addShop: "+ Tambah Kedai",
+    searchLabel: "Cari kedai gas LPG",
+    pageTitle: "Kedai gas berhampiran anda",
+    map: "Map",
+    list: "Senarai",
+    nearbyArea: "Sekitar Shah Alam",
+    shopsFound: "4 kedai ditemui",
+    listTitle: "Senarai kedai",
+    sortDescription:
+      "Disusun mengikut jarak terdekat. Jika lokasi tidak dibenarkan, susun ikut abjad.",
+    closestFirst: "Terdekat dahulu",
+    exchange: "Tukar",
+    newCylinder: "Beli Baru",
+    price14kg: "Harga tong 14kg",
+    price: "Harga",
+    unknownPrice: "Harga tidak diketahui",
+    directions: "Directions",
+    call: "Call",
+    summaryLabel: "Halaman utama",
+    summaryTitle: "Cari gas memasak sebelum dapur terhenti.",
+    summaryDescription:
+      "Direka untuk carian segera di rumah dan perniagaan kecil yang perlukan jawapan pantas: siapa berdekatan, apa yang dijual, harga semasa, dan cara ke sana.",
+    metricShops: "kedai",
+    metricNearest: "terdekat",
+    metricFrom: "mula",
+    stateExamples: "Contoh keadaan",
+    sampleData: "Data contoh",
+    loadingState: "Keadaan memuatkan",
+    emptyTitle: "Tiada kedai ditemui",
+    emptyDescription:
+      "Cuba kawasan lain atau bantu komuniti tambah kedai gas berdekatan.",
+    locationError: "Lokasi gagal dimuatkan",
+    locationErrorDescription:
+      "Semak permission lokasi atau terus lihat senarai ikut abjad.",
+    language: "Bahasa",
+    callShop: "Hubungi",
+    viewShop: "Lihat",
+  },
+  en: {
+    appTagline: "Nearby gas now",
+    myLocation: "My location",
+    addShop: "+ Add Shop",
+    searchLabel: "Find LPG gas shops",
+    pageTitle: "Gas shops near you",
+    map: "Map",
+    list: "List",
+    nearbyArea: "Around Shah Alam",
+    shopsFound: "4 shops found",
+    listTitle: "Shop list",
+    sortDescription:
+      "Sorted by closest distance. If location is not allowed, sort alphabetically.",
+    closestFirst: "Closest first",
+    exchange: "Exchange",
+    newCylinder: "Buy New",
+    price14kg: "14kg cylinder price",
+    price: "Price",
+    unknownPrice: "Price unknown",
+    directions: "Directions",
+    call: "Call",
+    summaryLabel: "Homepage",
+    summaryTitle: "Find cooking gas before the stove goes cold.",
+    summaryDescription:
+      "Designed for urgent household searches and small businesses that need a quick answer: who is nearby, what they sell, current price, and how to get there.",
+    metricShops: "shops",
+    metricNearest: "nearest",
+    metricFrom: "from",
+    stateExamples: "State examples",
+    sampleData: "Sample data",
+    loadingState: "Loading state",
+    emptyTitle: "No shops found",
+    emptyDescription:
+      "Try another area or help the community add a nearby gas shop.",
+    locationError: "Location failed to load",
+    locationErrorDescription:
+      "Check location permission or continue with an alphabetical list.",
+    language: "Language",
+    callShop: "Call",
+    viewShop: "View",
+  },
+  zh: {
+    appTagline: "附近煤气，马上找",
+    myLocation: "我的位置",
+    addShop: "+ 添加店铺",
+    searchLabel: "寻找 LPG 煤气店",
+    pageTitle: "你附近的煤气店",
+    map: "地图",
+    list: "列表",
+    nearbyArea: "莎阿南附近",
+    shopsFound: "找到 4 间店铺",
+    listTitle: "店铺列表",
+    sortDescription: "按最近距离排序。如果未允许定位，则按字母顺序排序。",
+    closestFirst: "最近优先",
+    exchange: "换气",
+    newCylinder: "买新桶",
+    price14kg: "14kg 气桶价格",
+    price: "价格",
+    unknownPrice: "价格未知",
+    directions: "路线",
+    call: "致电",
+    summaryLabel: "首页",
+    summaryTitle: "在炉火停下前，先找到煤气。",
+    summaryDescription:
+      "为紧急家庭需求和小型商家设计，快速知道附近有哪些店、卖什么、当前价格以及如何前往。",
+    metricShops: "店铺",
+    metricNearest: "最近",
+    metricFrom: "起",
+    stateExamples: "状态示例",
+    sampleData: "示例数据",
+    loadingState: "加载状态",
+    emptyTitle: "找不到店铺",
+    emptyDescription: "尝试其他地区，或帮助社区添加附近的煤气店。",
+    locationError: "位置加载失败",
+    locationErrorDescription: "请检查定位权限，或继续查看按字母排序的列表。",
+    language: "语言",
+    callShop: "致电",
+    viewShop: "查看",
+  },
+  ta: {
+    appTagline: "அருகிலுள்ள எரிவாயு இப்போது",
+    myLocation: "என் இருப்பிடம்",
+    addShop: "+ கடை சேர்க்க",
+    searchLabel: "LPG எரிவாயு கடைகளை தேடுங்கள்",
+    pageTitle: "உங்களுக்கு அருகிலுள்ள எரிவாயு கடைகள்",
+    map: "வரைபடம்",
+    list: "பட்டியல்",
+    nearbyArea: "ஷா ஆலம் சுற்றில்",
+    shopsFound: "4 கடைகள் கிடைத்தன",
+    listTitle: "கடை பட்டியல்",
+    sortDescription:
+      "அருகிலுள்ள தூரத்தின் அடிப்படையில் வரிசைப்படுத்தப்பட்டது. இருப்பிட அனுமதி இல்லையெனில், அகரவரிசைப்படி வரிசைப்படுத்தப்படும்.",
+    closestFirst: "அருகிலுள்ளது முதலில்",
+    exchange: "மாற்று",
+    newCylinder: "புதியது வாங்க",
+    price14kg: "14kg சிலிண்டர் விலை",
+    price: "விலை",
+    unknownPrice: "விலை தெரியவில்லை",
+    directions: "வழிகாட்டி",
+    call: "அழை",
+    summaryLabel: "முகப்பு",
+    summaryTitle: "அடுப்பு அணையும் முன் சமையல் எரிவாயுவை கண்டுபிடியுங்கள்.",
+    summaryDescription:
+      "அவசரமான வீட்டு தேடல்கள் மற்றும் சிறு வணிகங்களுக்கு விரைவான பதிலை வழங்க வடிவமைக்கப்பட்டது: அருகில் யார், என்ன விற்கிறார்கள், தற்போதைய விலை, எப்படி செல்வது.",
+    metricShops: "கடைகள்",
+    metricNearest: "அருகில்",
+    metricFrom: "முதல்",
+    stateExamples: "நிலை எடுத்துக்காட்டுகள்",
+    sampleData: "மாதிரி தரவு",
+    loadingState: "ஏற்றும் நிலை",
+    emptyTitle: "கடைகள் எதுவும் கிடைக்கவில்லை",
+    emptyDescription:
+      "வேறு பகுதியை முயற்சிக்கவும் அல்லது அருகிலுள்ள எரிவாயு கடையை சமூகத்திற்காக சேர்க்கவும்.",
+    locationError: "இருப்பிடம் ஏற்ற முடியவில்லை",
+    locationErrorDescription:
+      "இருப்பிட அனுமதியை சரிபார்க்கவும் அல்லது அகரவரிசை பட்டியலை தொடரவும்.",
+    language: "மொழி",
+    callShop: "அழை",
+    viewShop: "பார்",
+  },
+} as const
