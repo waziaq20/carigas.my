@@ -40,10 +40,6 @@ const seoContent = {
 
 export const revalidate = 3600
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
-}
-
 export async function generateMetadata({
   params,
 }: {
