@@ -3,9 +3,9 @@
 import { useState } from "react"
 
 import { SiteHeader } from "@/components/layout/site-header"
+import { ShopInsights } from "@/components/shops/shop-insights"
 import { ShopListView } from "@/components/shops/shop-list-view"
 import { ShopMapView } from "@/components/shops/shop-map-view"
-import { ShopStates } from "@/components/shops/shop-states"
 import { ShopSummary } from "@/components/shops/shop-summary"
 import {
   ShopViewToolbar,
@@ -114,7 +114,11 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
               lowestPrice={lowestPrice}
               shopCount={shops.length}
             />
-            <ShopStates dictionary={dictionary} />
+            <ShopInsights
+              dictionary={dictionary}
+              lowestPrice={lowestPrice}
+              shops={shops}
+            />
           </aside>
         </section>
 
@@ -124,7 +128,11 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
             lowestPrice={lowestPrice}
             shopCount={shops.length}
           />
-          <ShopStates dictionary={dictionary} />
+          <ShopInsights
+            dictionary={dictionary}
+            lowestPrice={lowestPrice}
+            shops={shops}
+          />
         </div>
       </div>
     </main>
