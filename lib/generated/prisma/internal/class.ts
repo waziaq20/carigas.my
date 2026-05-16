@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.8.0",
   "engineVersion": "3c6e192761c0362d496ed980de936e2f3cebcd3a",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../lib/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../lib/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Shop {\n  id        String   @id @default(cuid())\n  name      String\n  address   String\n  lat       Float\n  lng       Float\n  exchange  Boolean  @default(true)\n  sellNew   Boolean  @default(false)\n  price     Int?\n  phone     String?\n  approved  Boolean  @default(false)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -32,10 +32,10 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Shop\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"address\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lat\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"lng\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"exchange\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"sellNew\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"approved\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 config.parameterizationSchema = {
-  strings: JSON.parse("[]"),
-  graph: "AAAA"
+  strings: JSON.parse("[\"where\",\"Shop.findUnique\",\"Shop.findUniqueOrThrow\",\"orderBy\",\"cursor\",\"Shop.findFirst\",\"Shop.findFirstOrThrow\",\"Shop.findMany\",\"data\",\"Shop.createOne\",\"Shop.createMany\",\"Shop.createManyAndReturn\",\"Shop.updateOne\",\"Shop.updateMany\",\"Shop.updateManyAndReturn\",\"create\",\"update\",\"Shop.upsertOne\",\"Shop.deleteOne\",\"Shop.deleteMany\",\"having\",\"_count\",\"_avg\",\"_sum\",\"_min\",\"_max\",\"Shop.groupBy\",\"Shop.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"name\",\"address\",\"lat\",\"lng\",\"exchange\",\"sellNew\",\"price\",\"phone\",\"approved\",\"createdAt\",\"updatedAt\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"set\",\"increment\",\"decrement\",\"multiply\",\"divide\"]"),
+  graph: "QQsQDxwAAC8AMB0AAAQAEB4AAC8AMB8BAAAAASABADAAISEBADAAISIIADEAISMIADEAISQgADIAISUgADIAISYCADMAIScBADQAISggADIAISlAADUAISpAADUAIQEAAAABACABAAAAAQAgDxwAAC8AMB0AAAQAEB4AAC8AMB8BADAAISABADAAISEBADAAISIIADEAISMIADEAISQgADIAISUgADIAISYCADMAIScBADQAISggADIAISlAADUAISpAADUAIQImAAA2ACAnAAA2ACADAAAABAAgAwAABQAwBAAAAQAgAwAAAAQAIAMAAAUAMAQAAAEAIAMAAAAEACADAAAFADAEAAABACAMHwEAAAABIAEAAAABIQEAAAABIggAAAABIwgAAAABJCAAAAABJSAAAAABJgIAAAABJwEAAAABKCAAAAABKUAAAAABKkAAAAABAQgAAAkAIAwfAQAAAAEgAQAAAAEhAQAAAAEiCAAAAAEjCAAAAAEkIAAAAAElIAAAAAEmAgAAAAEnAQAAAAEoIAAAAAEpQAAAAAEqQAAAAAEBCAAACwAwAQgAAAsAMAwfAQA8ACEgAQA8ACEhAQA8ACEiCAA9ACEjCAA9ACEkIAA-ACElIAA-ACEmAgA_ACEnAQBAACEoIAA-ACEpQABBACEqQABBACECAAAAAQAgCAAADgAgDB8BADwAISABADwAISEBADwAISIIAD0AISMIAD0AISQgAD4AISUgAD4AISYCAD8AIScBAEAAISggAD4AISlAAEEAISpAAEEAIQIAAAAEACAIAAAQACACAAAABAAgCAAAEAAgAwAAAAEAIA8AAAkAIBAAAA4AIAEAAAABACABAAAABAAgBxUAADcAIBYAADgAIBcAADsAIBgAADoAIBkAADkAICYAADYAICcAADYAIA8cAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiCAAcACEjCAAcACEkIAAdACElIAAdACEmAgAeACEnAQAfACEoIAAdACEpQAAgACEqQAAgACEDAAAABAAgAwAAFgAwFAAAFwAgAwAAAAQAIAMAAAUAMAQAAAEAIA8cAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiCAAcACEjCAAcACEkIAAdACElIAAdACEmAgAeACEnAQAfACEoIAAdACEpQAAgACEqQAAgACEOFQAAIgAgGAAALgAgGQAALgAgKwEAAAABLAEAAAAELQEAAAAELgEAAAABLwEAAAABMAEAAAABMQEAAAABMgEALQAhMwEAAAABNAEAAAABNQEAAAABDRUAACIAIBYAACwAIBcAACwAIBgAACwAIBkAACwAICsIAAAAASwIAAAABC0IAAAABC4IAAAAAS8IAAAAATAIAAAAATEIAAAAATIIACsAIQUVAAAiACAYAAAqACAZAAAqACArIAAAAAEyIAApACENFQAAJQAgFgAAKAAgFwAAJQAgGAAAJQAgGQAAJQAgKwIAAAABLAIAAAAFLQIAAAAFLgIAAAABLwIAAAABMAIAAAABMQIAAAABMgIAJwAhDhUAACUAIBgAACYAIBkAACYAICsBAAAAASwBAAAABS0BAAAABS4BAAAAAS8BAAAAATABAAAAATEBAAAAATIBACQAITMBAAAAATQBAAAAATUBAAAAAQsVAAAiACAYAAAjACAZAAAjACArQAAAAAEsQAAAAAQtQAAAAAQuQAAAAAEvQAAAAAEwQAAAAAExQAAAAAEyQAAhACELFQAAIgAgGAAAIwAgGQAAIwAgK0AAAAABLEAAAAAELUAAAAAELkAAAAABL0AAAAABMEAAAAABMUAAAAABMkAAIQAhCCsCAAAAASwCAAAABC0CAAAABC4CAAAAAS8CAAAAATACAAAAATECAAAAATICACIAIQgrQAAAAAEsQAAAAAQtQAAAAAQuQAAAAAEvQAAAAAEwQAAAAAExQAAAAAEyQAAjACEOFQAAJQAgGAAAJgAgGQAAJgAgKwEAAAABLAEAAAAFLQEAAAAFLgEAAAABLwEAAAABMAEAAAABMQEAAAABMgEAJAAhMwEAAAABNAEAAAABNQEAAAABCCsCAAAAASwCAAAABS0CAAAABS4CAAAAAS8CAAAAATACAAAAATECAAAAATICACUAIQsrAQAAAAEsAQAAAAUtAQAAAAUuAQAAAAEvAQAAAAEwAQAAAAExAQAAAAEyAQAmACEzAQAAAAE0AQAAAAE1AQAAAAENFQAAJQAgFgAAKAAgFwAAJQAgGAAAJQAgGQAAJQAgKwIAAAABLAIAAAAFLQIAAAAFLgIAAAABLwIAAAABMAIAAAABMQIAAAABMgIAJwAhCCsIAAAAASwIAAAABS0IAAAABS4IAAAAAS8IAAAAATAIAAAAATEIAAAAATIIACgAIQUVAAAiACAYAAAqACAZAAAqACArIAAAAAEyIAApACECKyAAAAABMiAAKgAhDRUAACIAIBYAACwAIBcAACwAIBgAACwAIBkAACwAICsIAAAAASwIAAAABC0IAAAABC4IAAAAAS8IAAAAATAIAAAAATEIAAAAATIIACsAIQgrCAAAAAEsCAAAAAQtCAAAAAQuCAAAAAEvCAAAAAEwCAAAAAExCAAAAAEyCAAsACEOFQAAIgAgGAAALgAgGQAALgAgKwEAAAABLAEAAAAELQEAAAAELgEAAAABLwEAAAABMAEAAAABMQEAAAABMgEALQAhMwEAAAABNAEAAAABNQEAAAABCysBAAAAASwBAAAABC0BAAAABC4BAAAAAS8BAAAAATABAAAAATEBAAAAATIBAC4AITMBAAAAATQBAAAAATUBAAAAAQ8cAAAvADAdAAAEABAeAAAvADAfAQAwACEgAQAwACEhAQAwACEiCAAxACEjCAAxACEkIAAyACElIAAyACEmAgAzACEnAQA0ACEoIAAyACEpQAA1ACEqQAA1ACELKwEAAAABLAEAAAAELQEAAAAELgEAAAABLwEAAAABMAEAAAABMQEAAAABMgEALgAhMwEAAAABNAEAAAABNQEAAAABCCsIAAAAASwIAAAABC0IAAAABC4IAAAAAS8IAAAAATAIAAAAATEIAAAAATIIACwAIQIrIAAAAAEyIAAqACEIKwIAAAABLAIAAAAFLQIAAAAFLgIAAAABLwIAAAABMAIAAAABMQIAAAABMgIAJQAhCysBAAAAASwBAAAABS0BAAAABS4BAAAAAS8BAAAAATABAAAAATEBAAAAATIBACYAITMBAAAAATQBAAAAATUBAAAAAQgrQAAAAAEsQAAAAAQtQAAAAAQuQAAAAAEvQAAAAAEwQAAAAAExQAAAAAEyQAAjACEAAAAAAAABNgEAAAABBTYIAAAAATcIAAAAATgIAAAAATkIAAAAAToIAAAAAQE2IAAAAAEFNgIAAAABNwIAAAABOAIAAAABOQIAAAABOgIAAAABATYBAAAAAQE2QAAAAAEAAAAABRUABhYABxcACBgACRkACgAAAAAABRUABhYABxcACBgACRkACgECAQIDAQUGAQYHAQcIAQkKAQoMAgsNAwwPAQ0RAg4SBBETARIUARMVAhoYBRsZCw"
 }
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
@@ -70,8 +70,8 @@ export interface PrismaClientConstructor {
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more Users
-   * const users = await prisma.user.findMany()
+   * // Fetch zero or more Shops
+   * const shops = await prisma.shop.findMany()
    * ```
    * 
    * Read more in our [docs](https://pris.ly/d/client).
@@ -94,8 +94,8 @@ export interface PrismaClientConstructor {
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Shops
+ * const shops = await prisma.shop.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -188,7 +188,15 @@ export interface PrismaClient<
     extArgs: ExtArgs
   }>>
 
-    
+      /**
+   * `prisma.shop`: Exposes CRUD operations for the **Shop** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Shops
+    * const shops = await prisma.shop.findMany()
+    * ```
+    */
+  get shop(): Prisma.ShopDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
 export function getPrismaClientClass(): PrismaClientConstructor {

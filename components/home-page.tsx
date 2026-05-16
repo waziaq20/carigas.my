@@ -1,94 +1,94 @@
 "use client"
 
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { useState, type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
 import { localeLabels, locales, type Dictionary, type Locale } from "@/lib/i18n"
+import {
+  getLowestShopPrice,
+  sortShopsByDistance,
+  type Coordinates,
+  type UiShop,
+} from "@/lib/shops"
 import { cn } from "@/lib/utils"
 
 type ViewMode = "map" | "list"
 
-type Shop = {
-  id: number
-  name: string
-  address: string
-  distance: string
-  price: string | null
-  phone: string
-  exchange: boolean
-  newCylinder: boolean
-  top: string
-  left: string
-}
-
-const shops: Shop[] = [
-  {
-    id: 1,
-    name: "Kedai Gas Seri Maju",
-    address: "12, Jalan Melati 3, Taman Seri Maju, Shah Alam",
-    distance: "1.2 km",
-    price: "RM32.00",
-    phone: "+60355122388",
-    exchange: true,
-    newCylinder: true,
-    top: "39%",
-    left: "52%",
-  },
-  {
-    id: 2,
-    name: "Dapur Kita Trading",
-    address: "Lot 8, Jalan Anggerik, Seksyen 15, Shah Alam",
-    distance: "2.0 km",
-    price: null,
-    phone: "+60355418010",
-    exchange: true,
-    newCylinder: false,
-    top: "58%",
-    left: "34%",
-  },
-  {
-    id: 3,
-    name: "Rakan Gas Express",
-    address: "G-05, Pusat Komersial Hijau, Subang Jaya",
-    distance: "3.4 km",
-    price: "RM34.50",
-    phone: "+60356309011",
-    exchange: false,
-    newCylinder: true,
-    top: "28%",
-    left: "68%",
-  },
-  {
-    id: 4,
-    name: "Warung Bekalan Azman",
-    address: "45, Jalan Kenanga, Kampung Melayu Subang",
-    distance: "4.8 km",
-    price: "RM33.00",
-    phone: "+60378431122",
-    exchange: true,
-    newCylinder: true,
-    top: "70%",
-    left: "72%",
-  },
-]
-
-const activeShop = shops[0]
+const ShopMap = dynamic(() => import("@/components/shop-map"), {
+  ssr: false,
+  loading: () => <MapLoadingState />,
+})
 
 export function HomePage({
   dictionary,
+  initialShops,
   locale,
 }: {
   dictionary: Dictionary
+  initialShops: UiShop[]
   locale: Locale
 }) {
   const [view, setView] = useState<ViewMode>("map")
-  const [selectedShop, setSelectedShop] = useState<Shop>(activeShop)
+  const [shops, setShops] = useState(initialShops)
+  const [selectedShop, setSelectedShop] = useState<UiShop | null>(
+    initialShops[0] ?? null,
+  )
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null)
+  const [isLocating, setIsLocating] = useState(false)
+  const [locationError, setLocationError] = useState<string | null>(null)
+  const lowestPrice = getLowestShopPrice(shops)
+
+  function handleLocate() {
+    if (!navigator.geolocation) {
+      setLocationError(dictionary.locationErrorDescription)
+      return
+    }
+
+    setIsLocating(true)
+    setLocationError(null)
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        }
+        const sortedShops = sortShopsByDistance(shops, location)
+
+        setUserLocation(location)
+        setShops(sortedShops)
+        setSelectedShop((currentShop) =>
+          currentShop
+            ? (sortedShops.find((shop) => shop.id === currentShop.id) ??
+              sortedShops[0] ??
+              null)
+            : (sortedShops[0] ?? null),
+        )
+        setIsLocating(false)
+      },
+      () => {
+        setLocationError(dictionary.locationErrorDescription)
+        setIsLocating(false)
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 30000,
+        timeout: 10000,
+      },
+    )
+  }
 
   return (
     <main className="min-h-svh overflow-hidden bg-background text-foreground">
       <div className="mx-auto flex min-h-svh w-full max-w-7xl flex-col px-3 py-3 sm:px-5 sm:py-5 lg:px-8">
-        <Header dictionary={dictionary} locale={locale} />
+        <Header
+          dictionary={dictionary}
+          isLocating={isLocating}
+          locale={locale}
+          onLocate={handleLocate}
+        />
 
         <section className="grid flex-1 gap-4 pt-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:pt-5">
           <div className="flex min-h-0 flex-col overflow-hidden border border-border bg-card text-card-foreground shadow-sm">
@@ -98,27 +98,40 @@ export function HomePage({
               onViewChange={setView}
             />
 
-            <div className="relative min-h-[calc(100svh-11.5rem)] flex-1 overflow-hidden sm:min-h-[42rem] lg:min-h-0">
+            <div className="relative min-h-[calc(100svh-11.5rem)] flex-1 overflow-hidden sm:min-h-168 lg:min-h-0">
               {view === "map" ? (
                 <MapView
                   dictionary={dictionary}
+                  isLocating={isLocating}
+                  locationError={locationError}
+                  onLocate={handleLocate}
                   selectedShop={selectedShop}
+                  shops={shops}
+                  userLocation={userLocation}
                   onSelectShop={setSelectedShop}
                 />
               ) : (
-                <ListView dictionary={dictionary} />
+                <ListView dictionary={dictionary} shops={shops} />
               )}
             </div>
           </div>
 
           <aside className="hidden min-h-0 flex-col gap-4 lg:flex">
-            <SearchSummary dictionary={dictionary} />
+            <SearchSummary
+              dictionary={dictionary}
+              lowestPrice={lowestPrice}
+              shopCount={shops.length}
+            />
             <StateExamples dictionary={dictionary} />
           </aside>
         </section>
 
         <div className="grid gap-4 pt-4 lg:hidden">
-          <SearchSummary dictionary={dictionary} />
+          <SearchSummary
+            dictionary={dictionary}
+            lowestPrice={lowestPrice}
+            shopCount={shops.length}
+          />
           <StateExamples dictionary={dictionary} />
         </div>
       </div>
@@ -128,10 +141,14 @@ export function HomePage({
 
 function Header({
   dictionary,
+  isLocating,
   locale,
+  onLocate,
 }: {
   dictionary: Dictionary
+  isLocating: boolean
   locale: Locale
+  onLocate: () => void
 }) {
   return (
     <header className="flex flex-col gap-3 border border-border bg-card px-4 py-3 text-card-foreground shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -144,7 +161,7 @@ function Header({
           <GasIcon className="size-5" />
         </span>
         <span className="leading-none">
-          <span className="block text-lg font-black tracking-[-0.05em] text-foreground sm:text-xl">
+          <span className="block text-lg font-black tracking-tighter text-foreground sm:text-xl">
             carigas.my
           </span>
           <span className="hidden text-[0.65rem] font-semibold tracking-[0.22em] text-muted-foreground uppercase sm:block">
@@ -155,8 +172,13 @@ function Header({
 
       <div className="flex flex-wrap items-center gap-2">
         <LanguageSwitcher dictionary={dictionary} locale={locale} />
-        <Button variant="outline" className="hidden px-3 sm:inline-flex">
-          {dictionary.myLocation}
+        <Button
+          variant="outline"
+          className="hidden px-3 sm:inline-flex"
+          disabled={isLocating}
+          onClick={onLocate}
+        >
+          {isLocating ? dictionary.loadingState : dictionary.myLocation}
         </Button>
         <Button className="px-4 sm:px-5">{dictionary.addShop}</Button>
       </div>
@@ -244,64 +266,92 @@ function Toolbar({
   )
 }
 
+function MapLoadingState() {
+  return (
+    <div className="grid h-full min-h-[inherit] place-items-center bg-muted">
+      <div className="space-y-3 text-center">
+        <div className="mx-auto size-10 animate-pulse rounded-full bg-muted-foreground/30" />
+        <div className="h-3 w-36 animate-pulse bg-muted-foreground/30" />
+      </div>
+    </div>
+  )
+}
+
 function MapView({
   dictionary,
+  isLocating,
+  locationError,
+  onLocate,
+  shops,
   selectedShop,
+  userLocation,
   onSelectShop,
 }: {
   dictionary: Dictionary
-  selectedShop: Shop
-  onSelectShop: (shop: Shop) => void
+  isLocating: boolean
+  locationError: string | null
+  onLocate: () => void
+  shops: UiShop[]
+  selectedShop: UiShop | null
+  userLocation: Coordinates | null
+  onSelectShop: (shop: UiShop) => void
 }) {
+  if (shops.length === 0 || !selectedShop) {
+    return <EmptyState dictionary={dictionary} />
+  }
+
   return (
     <div className="relative h-full min-h-[inherit] overflow-hidden bg-muted">
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,currentColor_1px,transparent_1px),linear-gradient(0deg,currentColor_1px,transparent_1px)] bg-[size:72px_72px] text-border opacity-60" />
-      <div className="absolute top-[20%] -left-12 h-20 w-[120%] rotate-[-13deg] bg-background/60 blur-[1px]" />
-      <div className="absolute top-[12%] left-[8%] h-16 w-[92%] rotate-[18deg] bg-secondary/70 blur-[2px]" />
-      <div className="absolute top-[62%] left-[18%] h-24 w-[82%] rotate-[-20deg] bg-accent/70 blur-[3px]" />
+      <ShopMap
+        myLocationLabel={dictionary.myLocation}
+        onSelectShop={onSelectShop}
+        selectedShop={selectedShop}
+        shops={shops}
+        userLocation={userLocation}
+      />
 
       <div className="absolute top-4 left-4 z-20 border border-border bg-card p-3 text-card-foreground shadow-sm">
         <p className="text-[0.65rem] font-bold tracking-[0.18em] text-muted-foreground uppercase">
           {dictionary.nearbyArea}
         </p>
         <p className="mt-1 text-sm font-black text-foreground">
-          {dictionary.shopsFound}
+          {shops.length} {dictionary.metricShops}
         </p>
       </div>
 
       <Button
         variant="outline"
         className="absolute top-4 right-4 z-20 px-3 shadow-sm"
+        disabled={isLocating}
+        onClick={onLocate}
       >
         <LocateIcon className="size-4" />
-        {dictionary.myLocation}
+        {isLocating ? dictionary.loadingState : dictionary.myLocation}
       </Button>
 
-      {shops.map((shop) => (
-        <button
-          key={shop.id}
-          type="button"
-          onClick={() => onSelectShop(shop)}
-          className={cn(
-            "absolute z-10 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center border-4 border-background bg-foreground text-background shadow-sm transition hover:scale-110",
-            selectedShop.id === shop.id &&
-              "z-30 scale-110 bg-primary text-primary-foreground"
-          )}
-          style={{ top: shop.top, left: shop.left }}
-          aria-label={`${dictionary.viewShop} ${shop.name}`}
-        >
-          <PinIcon className="size-5" />
-        </button>
-      ))}
+      {locationError ? (
+        <div className="absolute top-20 right-4 z-20 max-w-64 border border-destructive/20 bg-destructive/10 p-3 text-destructive shadow-sm">
+          <div className="flex gap-2">
+            <AlertIcon className="mt-0.5 size-4 shrink-0" />
+            <p className="text-xs leading-5">{locationError}</p>
+          </div>
+        </div>
+      ) : null}
 
-      <div className="absolute inset-x-3 bottom-3 z-40 sm:inset-x-auto sm:bottom-6 sm:left-6 sm:w-[23rem]">
+      <div className="absolute inset-x-3 bottom-3 z-40 sm:inset-x-auto sm:bottom-6 sm:left-6 sm:w-92">
         <ShopPopup dictionary={dictionary} shop={selectedShop} />
       </div>
     </div>
   )
 }
 
-function ListView({ dictionary }: { dictionary: Dictionary }) {
+function ListView({
+  dictionary,
+  shops,
+}: {
+  dictionary: Dictionary
+  shops: UiShop[]
+}) {
   return (
     <div className="h-full overflow-y-auto bg-muted/40 p-3 sm:p-4">
       <div className="mb-3 flex flex-col gap-2 border border-border bg-card p-4 text-card-foreground shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -319,9 +369,13 @@ function ListView({ dictionary }: { dictionary: Dictionary }) {
       </div>
 
       <div className="grid gap-3">
-        {shops.map((shop) => (
-          <ShopCard key={shop.id} dictionary={dictionary} shop={shop} />
-        ))}
+        {shops.length > 0 ? (
+          shops.map((shop) => (
+            <ShopCard key={shop.id} dictionary={dictionary} shop={shop} />
+          ))
+        ) : (
+          <EmptyState dictionary={dictionary} />
+        )}
       </div>
     </div>
   )
@@ -332,7 +386,7 @@ function ShopPopup({
   shop,
 }: {
   dictionary: Dictionary
-  shop: Shop
+  shop: UiShop
 }) {
   return (
     <article className="border border-border bg-card p-4 text-card-foreground shadow-sm">
@@ -341,7 +395,7 @@ function ShopPopup({
           <h2 className="text-base font-black tracking-[-0.04em] text-foreground">
             {shop.name}
           </h2>
-          <p className="mt-1 max-w-[17rem] text-xs leading-5 text-muted-foreground">
+          <p className="mt-1 max-w-68 text-xs leading-5 text-muted-foreground">
             {shop.address}
           </p>
         </div>
@@ -369,19 +423,21 @@ function ShopPopup({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            asChild
-            variant="outline"
-            size="icon"
-            className="border-border bg-background"
-          >
-            <a
-              href={`tel:${shop.phone}`}
-              aria-label={`${dictionary.callShop} ${shop.name}`}
+          {shop.phone ? (
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="border-border bg-background"
             >
-              <PhoneIcon className="size-4" />
-            </a>
-          </Button>
+              <a
+                href={`tel:${shop.phone}`}
+                aria-label={`${dictionary.callShop} ${shop.name}`}
+              >
+                <PhoneIcon className="size-4" />
+              </a>
+            </Button>
+          ) : null}
           <Button asChild className="px-4">
             <a href="#directions">{dictionary.directions}</a>
           </Button>
@@ -396,7 +452,7 @@ function ShopCard({
   shop,
 }: {
   dictionary: Dictionary
-  shop: Shop
+  shop: UiShop
 }) {
   return (
     <article className="border border-border bg-card p-4 text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -433,16 +489,18 @@ function ShopCard({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            asChild
-            variant="outline"
-            className="border-border bg-background"
-          >
-            <a href={`tel:${shop.phone}`}>
-              <PhoneIcon className="size-4" />
-              {dictionary.call}
-            </a>
-          </Button>
+          {shop.phone ? (
+            <Button
+              asChild
+              variant="outline"
+              className="border-border bg-background"
+            >
+              <a href={`tel:${shop.phone}`}>
+                <PhoneIcon className="size-4" />
+                {dictionary.call}
+              </a>
+            </Button>
+          ) : null}
           <Button asChild className="px-4">
             <a href="#directions">{dictionary.directions}</a>
           </Button>
@@ -452,7 +510,15 @@ function ShopCard({
   )
 }
 
-function SearchSummary({ dictionary }: { dictionary: Dictionary }) {
+function SearchSummary({
+  dictionary,
+  lowestPrice,
+  shopCount,
+}: {
+  dictionary: Dictionary
+  lowestPrice: string | null
+  shopCount: number
+}) {
   return (
     <section className="border border-border bg-card p-5 text-card-foreground shadow-sm">
       <p className="text-xs font-bold tracking-[0.18em] text-muted-foreground uppercase">
@@ -464,12 +530,32 @@ function SearchSummary({ dictionary }: { dictionary: Dictionary }) {
       <p className="mt-3 text-sm leading-6 text-muted-foreground">
         {dictionary.summaryDescription}
       </p>
-      <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-        <Metric value="4" label={dictionary.metricShops} />
-        <Metric value="1.2km" label={dictionary.metricNearest} />
-        <Metric value="RM32" label={dictionary.metricFrom} />
+      <div className="mt-5 grid grid-cols-4 gap-2 text-center">
+        <Metric className="col-span-4" value={String(shopCount)} label={dictionary.metricShops} />
+        <Metric className="col-span-2" value="Selangor" label={dictionary.metricNearest} />
+        <Metric
+          className="col-span-2"
+          value={lowestPrice ?? dictionary.unknownPrice}
+          label={dictionary.metricFrom}
+        />
       </div>
     </section>
+  )
+}
+
+function EmptyState({ dictionary }: { dictionary: Dictionary }) {
+  return (
+    <div className="grid h-full min-h-80 place-items-center bg-muted/40 p-6">
+      <div className="max-w-sm border border-dashed border-border bg-card p-5 text-center text-card-foreground shadow-sm">
+        <p className="text-base font-black tracking-[-0.04em] text-foreground">
+          {dictionary.emptyTitle}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {dictionary.emptyDescription}
+        </p>
+        <Button className="mt-4 px-4">{dictionary.addShop}</Button>
+      </div>
+    </div>
   )
 }
 
@@ -549,10 +635,10 @@ function AvailabilityBadge({
   )
 }
 
-function Metric({ value, label }: { value: string; label: string }) {
+function Metric({ className, value, label }: { className?: string; value: string; label: string }) {
   return (
-    <div className="bg-muted p-3">
-      <p className="text-lg font-black tracking-[-0.05em] text-foreground">
+    <div className={cn("bg-muted p-3", className)}>
+      <p className="text-lg font-black tracking-tighter text-foreground">
         {value}
       </p>
       <p className="mt-1 text-[0.65rem] font-bold tracking-[0.12em] text-muted-foreground uppercase">
@@ -629,29 +715,6 @@ function ListIcon({ className }: { className?: string }) {
         stroke="currentColor"
         strokeWidth="3"
         strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function PinIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      aria-hidden="true"
-    >
-      <path
-        d="M12 22s7-6.1 7-12A7 7 0 0 0 5 10c0 5.9 7 12 7 12Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
-        stroke="currentColor"
-        strokeWidth="2"
       />
     </svg>
   )
