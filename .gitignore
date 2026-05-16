@@ -29,7 +29,11 @@ yarn-error.log*
 pnpm-debug.log*
 
 # env files
+.env
 .env*.local
+
+# generated prisma client
+/lib/generated/prisma/
 
 # typescript
 *.tsbuildinfo
