@@ -15,6 +15,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN apt-get update -qq \
+    && apt-get install -y -qq --no-install-recommends curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
 
@@ -36,5 +41,8 @@ ENV HOSTNAME=0.0.0.0
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
