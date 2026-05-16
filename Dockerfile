@@ -20,8 +20,8 @@ RUN apt-get update -qq \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs \
+    && useradd --system --uid 1001 --gid nodejs --create-home nextjs
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
