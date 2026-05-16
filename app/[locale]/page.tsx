@@ -4,7 +4,8 @@ import { notFound } from "next/navigation"
 import { HomePage } from "@/components/home-page"
 import { getDictionary, isLocale, locales } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
-import { mapShopToUiShop, type UiShop } from "@/lib/shops"
+import { mapShopToUiShop } from "@/lib/shops"
+import type { UiShop } from "@/types"
 
 const siteUrl = "https://carigas.my"
 
@@ -55,7 +56,7 @@ export async function generateMetadata({
   }
 
   const alternates = Object.fromEntries(
-    locales.map((targetLocale) => [targetLocale, `/${targetLocale}`]),
+    locales.map((targetLocale) => [targetLocale, `/${targetLocale}`])
   )
 
   return {

@@ -1,19 +1,6 @@
+import type { ShopCreateData, ShopUpdateData } from "@/types"
+
 type JsonObject = Record<string, unknown>
-
-export type ShopCreateData = {
-  name: string
-  address: string
-  lat: number
-  lng: number
-  exchange?: boolean
-  sellNew?: boolean
-  price?: number | null
-  phone?: string | null
-}
-
-export type ShopUpdateData = Partial<ShopCreateData> & {
-  approved?: boolean
-}
 
 type ValidationResult<T> =
   | {
@@ -32,7 +19,7 @@ function isJsonObject(value: unknown): value is JsonObject {
 function readRequiredString(
   body: JsonObject,
   field: "name" | "address",
-  errors: string[],
+  errors: string[]
 ) {
   const value = body[field]
 
@@ -47,7 +34,7 @@ function readRequiredString(
 function readRequiredNumber(
   body: JsonObject,
   field: "lat" | "lng",
-  errors: string[],
+  errors: string[]
 ) {
   const value = body[field]
 
@@ -62,7 +49,7 @@ function readRequiredNumber(
 function assignOptionalFields(
   body: JsonObject,
   data: ShopCreateData | ShopUpdateData,
-  errors: string[],
+  errors: string[]
 ) {
   if ("exchange" in body) {
     if (typeof body.exchange === "boolean") {
@@ -105,7 +92,9 @@ function assignOptionalFields(
   }
 }
 
-export function parseShopCreateInput(body: unknown): ValidationResult<ShopCreateData> {
+export function parseShopCreateInput(
+  body: unknown
+): ValidationResult<ShopCreateData> {
   if (!isJsonObject(body)) {
     return {
       ok: false,
@@ -130,7 +119,9 @@ export function parseShopCreateInput(body: unknown): ValidationResult<ShopCreate
   return { ok: true, data }
 }
 
-export function parseShopUpdateInput(body: unknown): ValidationResult<ShopUpdateData> {
+export function parseShopUpdateInput(
+  body: unknown
+): ValidationResult<ShopUpdateData> {
   if (!isJsonObject(body)) {
     return {
       ok: false,

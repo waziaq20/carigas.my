@@ -1,35 +1,4 @@
-export type ShopRecord = {
-  id: string
-  name: string
-  address: string
-  lat: number
-  lng: number
-  exchange: boolean
-  sellNew: boolean
-  price: number | null
-  phone: string | null
-}
-
-export type UiShop = {
-  id: string
-  name: string
-  address: string
-  distance: string
-  price: string | null
-  priceValue: number | null
-  phone: string | null
-  exchange: boolean
-  newCylinder: boolean
-  lat: number
-  lng: number
-  top: string
-  left: string
-}
-
-export type Coordinates = {
-  lat: number
-  lng: number
-}
+import type { Coordinates, ShopRecord, UiShop } from "@/types"
 
 const mapBounds = {
   minLat: 2.9,
@@ -121,7 +90,10 @@ export function formatDistance(distanceInKm: number) {
   return `${distanceInKm.toFixed(1)} km`
 }
 
-export function sortShopsByDistance(shops: UiShop[], userLocation: Coordinates) {
+export function sortShopsByDistance(
+  shops: UiShop[],
+  userLocation: Coordinates
+) {
   return shops
     .map((shop) => {
       const distanceInKm = getDistanceInKm(userLocation, shop)
@@ -134,6 +106,6 @@ export function sortShopsByDistance(shops: UiShop[], userLocation: Coordinates) 
     .sort(
       (firstShop, secondShop) =>
         getDistanceInKm(userLocation, firstShop) -
-        getDistanceInKm(userLocation, secondShop),
+        getDistanceInKm(userLocation, secondShop)
     )
 }

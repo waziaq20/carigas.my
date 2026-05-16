@@ -11,12 +11,7 @@ import {
   useMap,
 } from "react-leaflet"
 
-import type { UiShop } from "@/lib/shops"
-
-type Coordinates = {
-  lat: number
-  lng: number
-}
+import type { Coordinates, UiShop } from "@/types"
 
 type ShopMapProps = {
   myLocationLabel: string
@@ -36,7 +31,7 @@ function getMapCenter(shops: UiShop[]): [number, number] {
       lat: current.lat + shop.lat,
       lng: current.lng + shop.lng,
     }),
-    { lat: 0, lng: 0 },
+    { lat: 0, lng: 0 }
   )
 
   return [totals.lat / shops.length, totals.lng / shops.length]
@@ -53,7 +48,11 @@ function createShopIcon(selected: boolean) {
   })
 }
 
-function MapCenterUpdater({ userLocation }: { userLocation: Coordinates | null }) {
+function MapCenterUpdater({
+  userLocation,
+}: {
+  userLocation: Coordinates | null
+}) {
   const map = useMap()
 
   useEffect(() => {
