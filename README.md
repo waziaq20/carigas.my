@@ -85,3 +85,14 @@ Creates a shop using validated JSON input. New shops still depend on approval be
 - The public map uses OpenStreetMap tiles with app-themed Leaflet styling.
 - Browser geolocation requires HTTPS or localhost.
 - Existing verification is lint, typecheck, and build; no test runner is configured yet.
+
+## Contribution
+
+- Fork the repository.
+- Create a new branch for your feature or bug fix.
+- Write your code.
+- Add tests if applicable.
+- Push to your branch.
+- Create a pull request.
+- Wait for review and merge.
+- Delete your branch.
