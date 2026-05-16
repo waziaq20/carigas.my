@@ -32,15 +32,15 @@ COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/lib/generated/prisma ./lib/generated/prisma
 COPY --from=deps /app/node_modules ./node_modules
 
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-
-COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
