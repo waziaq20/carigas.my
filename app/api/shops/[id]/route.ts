@@ -1,3 +1,4 @@
+import { requireAdminRequest, requireSameOriginRequest } from "@/lib/admin-auth"
 import { prisma } from "@/lib/prisma"
 
 import { parseShopUpdateInput } from "../validation"
@@ -35,6 +36,18 @@ export async function GET(_request: Request, { params }: RouteContext) {
 }
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const unauthorized = requireAdminRequest(request)
+
+  if (unauthorized) {
+    return unauthorized
+  }
+
+  const forbidden = requireSameOriginRequest(request)
+
+  if (forbidden) {
+    return forbidden
+  }
+
   const { id } = await params
   let body: unknown
 
@@ -88,7 +101,19 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: RouteContext) {
+export async function DELETE(request: Request, { params }: RouteContext) {
+  const unauthorized = requireAdminRequest(request)
+
+  if (unauthorized) {
+    return unauthorized
+  }
+
+  const forbidden = requireSameOriginRequest(request)
+
+  if (forbidden) {
+    return forbidden
+  }
+
   const { id } = await params
 
   try {

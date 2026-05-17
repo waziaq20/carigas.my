@@ -3,6 +3,7 @@ import Link from "next/link"
 import { GasIcon } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui/button"
 import type { Dictionary, Locale } from "@/lib/i18n"
+import { addShopFormUrl } from "@/lib/links"
 
 import { LanguageSwitcher } from "./language-switcher"
 
@@ -49,7 +50,11 @@ export function SiteHeader({
         >
           {isLocating ? dictionary.loadingState : dictionary.myLocation}
         </Button>
-        <Button className="px-4 sm:px-5">{dictionary.addShop}</Button>
+        <Button className="px-4 sm:px-5" asChild>
+          <a href={addShopFormUrl} target="_blank" rel="noopener noreferrer">
+            {dictionary.addShop}
+          </a>
+        </Button>
       </div>
     </header>
   )

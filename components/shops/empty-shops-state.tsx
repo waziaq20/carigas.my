@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
+import { addShopFormUrl } from "@/lib/links"
 
 type EmptyShopsStateProps = {
   dictionary: Dictionary
@@ -15,7 +16,11 @@ export function EmptyShopsState({ dictionary }: EmptyShopsStateProps) {
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {dictionary.emptyDescription}
         </p>
-        <Button className="mt-4 px-4">{dictionary.addShop}</Button>
+        <Button className="mt-4 px-4" asChild>
+          <a href={addShopFormUrl} target="_blank" rel="noopener noreferrer">
+            {dictionary.addShop}
+          </a>
+        </Button>
       </div>
     </div>
   )

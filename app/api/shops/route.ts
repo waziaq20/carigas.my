@@ -1,3 +1,4 @@
+import { requireAdminRequest, requireSameOriginRequest } from "@/lib/admin-auth"
 import { defaultLocale, getDictionary, isLocale } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 import { mapShopToUiShop, sortShopsByDistance } from "@/lib/shops"
@@ -49,6 +50,18 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = requireAdminRequest(request)
+
+  if (unauthorized) {
+    return unauthorized
+  }
+
+  const forbidden = requireSameOriginRequest(request)
+
+  if (forbidden) {
+    return forbidden
+  }
+
   let body: unknown
 
   try {

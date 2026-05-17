@@ -29,8 +29,10 @@
 
 ```txt
 app/                      App Router pages, API routes, metadata, icons
+app/admin/                Admin login, dashboard, and shop management routes
 components/home-page.tsx  Home page state and composition
 components/layout/        Site header and language switcher
+components/admin/         Admin shop form components
 components/shops/         Reusable shop UI components
 components/icons/         Inline app icons
 components/ui/            shadcn/ui components
@@ -58,7 +60,13 @@ Prisma reads the database URL through `prisma.config.ts`.
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD="change-this-password"
+ADMIN_SESSION_SECRET="replace-with-at-least-32-random-characters"
+ADMIN_SESSION_TTL_SECONDS="28800"
 ```
+
+`ADMIN_SESSION_SECRET` signs the httpOnly admin session cookie and must be a long random value. Admin pages are available under `/admin`.
 
 ## API
 
@@ -78,6 +86,10 @@ POST /api/shops
 ```
 
 Creates a shop using validated JSON input. New shops still depend on approval before appearing in public listings.
+
+Write methods (`POST /api/shops`, `PATCH /api/shops/:id`, and `DELETE /api/shops/:id`) require a valid admin session cookie and same-origin requests.
+
+Public shop suggestions from the website are collected through the Google Form at https://forms.gle/njKKuerdWKEV9snu7.
 
 ## Notes
 
