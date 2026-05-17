@@ -64,9 +64,12 @@ ADMIN_USERNAME="admin"
 ADMIN_PASSWORD="change-this-password"
 ADMIN_SESSION_SECRET="replace-with-at-least-32-random-characters"
 ADMIN_SESSION_TTL_SECONDS="28800"
+NEXT_PUBLIC_GA_MEASUREMENT_ID="G-8BBZEGLH6Q"
 ```
 
 `ADMIN_SESSION_SECRET` signs the httpOnly admin session cookie and must be a long random value. Admin pages are available under `/admin`.
+
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` enables GA4 on public localized routes only. Admin routes are not tracked.
 
 ## API
 
