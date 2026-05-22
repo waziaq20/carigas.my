@@ -1,3 +1,4 @@
+import { normalizeMalaysianPhone } from "@/lib/phone"
 import type { ShopCreateData, ShopUpdateData } from "@/types"
 
 type JsonObject = Record<string, unknown>
@@ -85,7 +86,19 @@ function assignOptionalFields(
     if (body.phone === null) {
       data.phone = null
     } else if (typeof body.phone === "string") {
-      data.phone = body.phone.trim() || null
+      const trimmed = body.phone.trim()
+
+      if (trimmed === "") {
+        data.phone = null
+      } else {
+        const normalized = normalizeMalaysianPhone(trimmed)
+
+        if (!normalized) {
+          errors.push("phone must be a valid Malaysian number")
+        } else {
+          data.phone = normalized
+        }
+      }
     } else {
       errors.push("phone must be a string or null")
     }

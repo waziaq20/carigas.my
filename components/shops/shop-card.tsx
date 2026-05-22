@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
 import { getGoogleMapsDirectionsUrl } from "@/lib/maps"
+import { formatMalaysianPhoneDisplay } from "@/lib/phone"
 import type { UiShop } from "@/types"
 
 import { AvailabilityBadge } from "./availability-badge"
@@ -65,7 +66,7 @@ export function ShopCard({ dictionary, shop }: ShopCardProps) {
             >
               <a href={`tel:${shop.phone}`}>
                 <PhoneIcon className="size-4" />
-                {dictionary.call}
+                {formatMalaysianPhoneDisplay(shop.phone) ?? dictionary.call}
               </a>
             </Button>
           ) : null}

@@ -19,6 +19,7 @@ import {
   recordFailedLogin,
 } from "@/lib/admin-rate-limit"
 import { locales } from "@/lib/i18n"
+import { normalizeMalaysianPhone } from "@/lib/phone"
 import { prisma } from "@/lib/prisma"
 import type { ShopCreateData } from "@/types"
 
@@ -68,6 +69,22 @@ function getPriceInSen(formData: FormData) {
   return Math.round(price * 100)
 }
 
+function getNormalizedPhone(formData: FormData) {
+  const value = getText(formData, "phone")
+
+  if (!value) {
+    return null
+  }
+
+  const normalized = normalizeMalaysianPhone(value)
+
+  if (!normalized) {
+    throw new Error("phone must be a valid Malaysian number")
+  }
+
+  return normalized
+}
+
 function getShopData(formData: FormData): AdminShopData {
   return {
     address: getRequiredText(formData, "address"),
@@ -76,7 +93,7 @@ function getShopData(formData: FormData): AdminShopData {
     lat: getRequiredNumber(formData, "lat"),
     lng: getRequiredNumber(formData, "lng"),
     name: getRequiredText(formData, "name"),
-    phone: getText(formData, "phone") || null,
+    phone: getNormalizedPhone(formData),
     price: getPriceInSen(formData),
     sellNew: formData.get("sellNew") === "on",
   }

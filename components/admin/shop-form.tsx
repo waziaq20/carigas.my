@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { PhoneInput } from "@/components/admin/phone-input"
+import { ShopLocationPicker } from "@/components/admin/shop-location-picker"
 import { Button } from "@/components/ui/button"
 
 type EditableShop = {
@@ -72,29 +74,12 @@ export function ShopForm({ action, cta, shop, title }: ShopFormProps) {
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-semibold">
-          Latitude
-          <input
-            className={inputClassName}
-            name="lat"
-            type="number"
-            step="any"
-            defaultValue={shop?.lat}
-            required
+        <div className="sm:col-span-2">
+          <ShopLocationPicker
+            defaultLat={shop?.lat}
+            defaultLng={shop?.lng}
           />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm font-semibold">
-          Longitude
-          <input
-            className={inputClassName}
-            name="lng"
-            type="number"
-            step="any"
-            defaultValue={shop?.lng}
-            required
-          />
-        </label>
+        </div>
 
         <label className="flex flex-col gap-2 text-sm font-semibold">
           14kg price (RM)
@@ -109,16 +94,7 @@ export function ShopForm({ action, cta, shop, title }: ShopFormProps) {
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-semibold">
-          Phone
-          <input
-            className={inputClassName}
-            name="phone"
-            type="tel"
-            defaultValue={shop?.phone ?? ""}
-            placeholder="+60123456789"
-          />
-        </label>
+        <PhoneInput defaultValue={shop?.phone} />
       </div>
 
       <div className="mt-5 grid gap-3 border-t border-border pt-5 sm:grid-cols-3">

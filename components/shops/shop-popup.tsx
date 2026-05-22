@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
 import { getGoogleMapsDirectionsUrl } from "@/lib/maps"
+import { formatMalaysianPhoneDisplay } from "@/lib/phone"
 import type { UiShop } from "@/types"
 
 import { AvailabilityBadge } from "./availability-badge"
@@ -66,7 +67,7 @@ export function ShopPopup({ dictionary, shop }: ShopPopupProps) {
             >
               <a
                 href={`tel:${shop.phone}`}
-                aria-label={`${dictionary.callShop} ${shop.name}`}
+                aria-label={`${dictionary.callShop} ${formatMalaysianPhoneDisplay(shop.phone) ?? shop.name}`}
               >
                 <PhoneIcon className="size-4" />
               </a>
