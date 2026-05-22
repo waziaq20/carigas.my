@@ -21,7 +21,10 @@ import {
 import { locales } from "@/lib/i18n"
 import { normalizeMalaysianPhone } from "@/lib/phone"
 import { prisma } from "@/lib/prisma"
+import { parseShopsFromCsv } from "@/lib/shop-csv"
 import type { ShopCreateData } from "@/types"
+
+const adminImportPath = "/admin/shops/import"
 
 type AdminShopData = ShopCreateData & {
   approved: boolean
@@ -202,4 +205,44 @@ export async function deleteShop(id: string, formData?: FormData) {
   })
 
   revalidatePublicShopPages()
+}
+
+export async function importShops(formData: FormData) {
+  await requireAdminSession()
+
+  const file = formData.get("file")
+
+  if (!(file instanceof File) || file.size === 0) {
+    redirect(`${adminImportPath}?error=missing-file`)
+  }
+
+  const text = await file.text()
+  const { rows, errors } = parseShopsFromCsv(text)
+
+  let created = 0
+
+  if (rows.length > 0) {
+    const result = await prisma.shop.createMany({
+      data: rows.map((row) => row.data),
+    })
+    created = result.count
+  }
+
+  if (created > 0) {
+    revalidatePublicShopPages()
+  }
+
+  const params = new URLSearchParams()
+  params.set("created", String(created))
+  params.set("skipped", String(errors.length))
+
+  if (errors.length > 0) {
+    const summary = errors
+      .slice(0, 5)
+      .map((error) => `line ${error.lineNumber}: ${error.message}`)
+      .join(" | ")
+    params.set("errors", summary)
+  }
+
+  redirect(`${adminImportPath}?${params.toString()}`)
 }

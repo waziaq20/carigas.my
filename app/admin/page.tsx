@@ -100,6 +100,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             <span className="border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
               Signed in as {session.username}
             </span>
+            <Button variant="outline" asChild>
+              <Link href="/admin/shops/import">Import / export</Link>
+            </Button>
             <Button asChild>
               <Link href="/admin/shops/new">Add shop</Link>
             </Button>
