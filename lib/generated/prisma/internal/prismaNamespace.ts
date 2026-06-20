@@ -528,6 +528,7 @@ export const ShopScalarFieldEnum = {
   price: 'price',
   phone: 'phone',
   approved: 'approved',
+  submittedBy: 'submittedBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -13,6 +13,7 @@ export type ShopRecord = {
   sellNew: boolean
   price: number | null
   phone: string | null
+  submittedBy: string | null
 }
 
 export type ShopCreateData = {
@@ -24,6 +25,7 @@ export type ShopCreateData = {
   sellNew?: boolean
   price?: number | null
   phone?: string | null
+  submittedBy?: string | null
 }
 
 export type ShopUpdateData = Partial<ShopCreateData> & {

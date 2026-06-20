@@ -103,6 +103,18 @@ function assignOptionalFields(
       errors.push("phone must be a string or null")
     }
   }
+
+  if ("submittedBy" in body) {
+    if (body.submittedBy === null) {
+      data.submittedBy = null
+    } else if (typeof body.submittedBy === "string") {
+      const trimmed = body.submittedBy.trim()
+
+      data.submittedBy = trimmed === "" ? null : trimmed
+    } else {
+      errors.push("submittedBy must be a string or null")
+    }
+  }
 }
 
 export function parseShopCreateInput(
