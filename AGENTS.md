@@ -16,6 +16,9 @@
 - `bun run prisma:generate` regenerates the ignored Prisma client under `lib/generated/prisma/`; `bun run prisma:migrate` requires `DATABASE_URL`.
 - No test runner or CI workflow is configured; use lint, typecheck, and build for verification unless you add tests.
 
+## Design Reference
+- All UI design must follow `DESIGN.md` — color palette, typography, spacing, shadows, border-radius, and component styles are defined there. Consult it before writing any markup or styles.
+
 ## Styling And UI
 - Tailwind CSS v4 is configured through `app/globals.css` and PostCSS; do not add a Tailwind config file unless a tool explicitly requires one.
 - Prettier uses `prettier-plugin-tailwindcss` with `tailwindStylesheet: "app/globals.css"` and sorts classes inside `cn()` and `cva()`.
