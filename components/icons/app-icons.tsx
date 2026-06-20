@@ -206,6 +206,46 @@ export function XIcon({ className }: IconProps) {
   )
 }
 
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="m21 21-4.3-4.3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function SlidersIcon({ className }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h7M15 18h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="16" cy="6" r="2" stroke="currentColor" strokeWidth="2" />
+      <circle cx="8" cy="12" r="2" stroke="currentColor" strokeWidth="2" />
+      <circle cx="13" cy="18" r="2" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  )
+}
+
 export function AlertIcon({ className }: IconProps) {
   return (
     <svg

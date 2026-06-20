@@ -70,8 +70,8 @@ export default async function ImportShopsPage({
             Import shops from CSV
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Upload a CSV with the columns below. Phone numbers are normalized
-            to international format. Each row becomes a new shop record.
+            Upload a CSV with the columns below. Phone numbers are normalized to
+            international format. Each row becomes a new shop record.
           </p>
 
           <div className="mt-4 overflow-x-auto border border-border bg-background p-3">

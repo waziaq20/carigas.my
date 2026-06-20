@@ -28,10 +28,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
   } catch (error) {
     console.error("Failed to fetch shop", error)
 
-    return Response.json(
-      { error: "Failed to fetch shop" },
-      { status: 500 },
-    )
+    return Response.json({ error: "Failed to fetch shop" }, { status: 500 })
   }
 }
 
@@ -56,7 +53,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   } catch {
     return Response.json(
       { error: "Request body must be valid JSON" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -68,7 +65,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
         error: "Invalid shop data",
         issues: result.errors,
       },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -94,10 +91,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   } catch (error) {
     console.error("Failed to update shop", error)
 
-    return Response.json(
-      { error: "Failed to update shop" },
-      { status: 500 },
-    )
+    return Response.json({ error: "Failed to update shop" }, { status: 500 })
   }
 }
 
@@ -137,9 +131,6 @@ export async function DELETE(request: Request, { params }: RouteContext) {
   } catch (error) {
     console.error("Failed to delete shop", error)
 
-    return Response.json(
-      { error: "Failed to delete shop" },
-      { status: 500 },
-    )
+    return Response.json({ error: "Failed to delete shop" }, { status: 500 })
   }
 }

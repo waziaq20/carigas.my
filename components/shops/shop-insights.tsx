@@ -15,7 +15,9 @@ type InsightRowProps = {
 function InsightRow({ label, value }: InsightRowProps) {
   return (
     <div className="flex items-center justify-between gap-3 border border-border bg-muted/40 px-3 py-2.5">
-      <span className="text-xs font-bold text-muted-foreground lowercase">{label}</span>
+      <span className="text-xs font-bold text-muted-foreground lowercase">
+        {label}
+      </span>
       <span className="text-sm font-black text-foreground">{value}</span>
     </div>
   )

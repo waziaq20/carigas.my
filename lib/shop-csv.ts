@@ -76,7 +76,9 @@ export function serializeShopsToCsv(shops: ExportableShop[]): string {
       approved: shop.approved ? "true" : "false",
     }
 
-    lines.push(shopCsvHeaders.map((header) => escapeCsvValue(row[header])).join(","))
+    lines.push(
+      shopCsvHeaders.map((header) => escapeCsvValue(row[header])).join(",")
+    )
   }
 
   return `${lines.join("\r\n")}\r\n`
@@ -180,7 +182,10 @@ export function parseShopsFromCsv(text: string): ParseShopsResult {
   const parsed: ParsedShopRow[] = []
 
   if (rows.length === 0) {
-    return { rows: parsed, errors: [{ lineNumber: 0, message: "CSV is empty" }] }
+    return {
+      rows: parsed,
+      errors: [{ lineNumber: 0, message: "CSV is empty" }],
+    }
   }
 
   const header = rows[0].map((value) => value.trim())
@@ -257,7 +262,10 @@ export function parseShopsFromCsv(text: string): ParseShopsResult {
 
     const priceResult = parsePriceRmToSen(get("price"))
     if (priceResult === "invalid") {
-      errors.push({ lineNumber, message: "price must be a non-negative number" })
+      errors.push({
+        lineNumber,
+        message: "price must be a non-negative number",
+      })
       continue
     }
 

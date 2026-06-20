@@ -156,7 +156,10 @@ function verifyAdminToken(token: string | undefined): AdminSession | null {
 export function verifyAdminCredentials(username: string, password: string) {
   const config = getAdminConfig()
 
-  return safeEqual(username.trim(), config.username) && safeEqual(password, config.password)
+  return (
+    safeEqual(username.trim(), config.username) &&
+    safeEqual(password, config.password)
+  )
 }
 
 export async function createAdminSessionCookie() {

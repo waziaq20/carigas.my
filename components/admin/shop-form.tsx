@@ -75,10 +75,7 @@ export function ShopForm({ action, cta, shop, title }: ShopFormProps) {
         </label>
 
         <div className="sm:col-span-2">
-          <ShopLocationPicker
-            defaultLat={shop?.lat}
-            defaultLng={shop?.lng}
-          />
+          <ShopLocationPicker defaultLat={shop?.lat} defaultLng={shop?.lng} />
         </div>
 
         <label className="flex flex-col gap-2 text-sm font-semibold">
@@ -107,11 +104,19 @@ export function ShopForm({ action, cta, shop, title }: ShopFormProps) {
           Exchange available
         </label>
         <label className="flex items-center gap-3 border border-border bg-background p-3 text-sm font-semibold">
-          <input name="sellNew" type="checkbox" defaultChecked={shop?.sellNew} />
+          <input
+            name="sellNew"
+            type="checkbox"
+            defaultChecked={shop?.sellNew}
+          />
           New cylinder available
         </label>
         <label className="flex items-center gap-3 border border-border bg-background p-3 text-sm font-semibold">
-          <input name="approved" type="checkbox" defaultChecked={shop?.approved} />
+          <input
+            name="approved"
+            type="checkbox"
+            defaultChecked={shop?.approved}
+          />
           Approved for public listing
         </label>
       </div>

@@ -53,9 +53,7 @@ export function PhoneInput({ defaultValue, name = "phone" }: PhoneInputProps) {
           aria-describedby={showError ? `${name}-error` : `${name}-hint`}
         />
       </div>
-
       <input type="hidden" name={name} value={e164 ?? ""} />
-
       {showError ? (
         <p
           id={`${name}-error`}
