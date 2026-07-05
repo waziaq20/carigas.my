@@ -1,10 +1,8 @@
 import Link from "next/link"
 
-import {
-  deleteShop,
-  logoutAdmin,
-  toggleShopApproval,
-} from "@/app/admin/actions"
+import { logoutAdmin } from "@/app/admin/actions"
+import { ShopsTable } from "@/components/admin/shops-table"
+import type { ShopTableRow } from "@/components/admin/shops-table"
 import { GasIcon } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui/button"
 import { requireAdminSession } from "@/lib/admin-auth"
@@ -80,6 +78,19 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const firstShopIndex =
     totalCount === 0 ? 0 : (boundedCurrentPage - 1) * shopsPerPage + 1
   const lastShopIndex = Math.min(boundedCurrentPage * shopsPerPage, totalCount)
+  const shopRows: ShopTableRow[] = shops.map((shop) => ({
+    id: shop.id,
+    name: shop.name,
+    address: shop.address,
+    phone: shop.phone,
+    exchange: shop.exchange,
+    sellNew: shop.sellNew,
+    lat: shop.lat,
+    lng: shop.lng,
+    priceLabel: formatShopPrice(shop.price) ?? "-",
+    approved: shop.approved,
+    updatedAtLabel: formatDate(shop.updatedAt),
+  }))
 
   return (
     <main className="min-h-svh bg-background px-4 py-5 text-foreground sm:px-6 lg:px-8">
@@ -155,93 +166,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             </Button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-240 border-collapse text-left text-sm">
-              <thead className="bg-muted/50 text-xs tracking-[0.16em] text-muted-foreground uppercase">
-                <tr>
-                  <th className="px-4 py-3 font-bold">Shop</th>
-                  <th className="px-4 py-3 font-bold">Services</th>
-                  <th className="px-4 py-3 font-bold">Price</th>
-                  <th className="px-4 py-3 font-bold">Status</th>
-                  <th className="px-4 py-3 font-bold">Updated</th>
-                  <th className="px-4 py-3 font-bold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shops.length > 0 ? (
-                  shops.map((shop) => (
-                    <tr key={shop.id} className="border-t border-border">
-                      <td className="max-w-96 px-4 py-4 align-top">
-                        <p className="font-black tracking-[-0.03em]">
-                          {shop.name}
-                        </p>
-                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                          {shop.address}
-                        </p>
-                        {shop.phone ? (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {shop.phone}
-                          </p>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-4 align-top text-xs text-muted-foreground">
-                        <p>Exchange: {shop.exchange ? "Yes" : "No"}</p>
-                        <p>New cylinder: {shop.sellNew ? "Yes" : "No"}</p>
-                        <p>
-                          {shop.lat.toFixed(5)}, {shop.lng.toFixed(5)}
-                        </p>
-                      </td>
-                      <td className="px-4 py-4 align-top font-semibold">
-                        {formatShopPrice(shop.price) ?? "-"}
-                      </td>
-                      <td className="px-4 py-4 align-top">
-                        <span className="inline-flex border border-border bg-background px-2.5 py-1 text-xs font-bold">
-                          {shop.approved ? "Approved" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 align-top text-xs text-muted-foreground">
-                        {formatDate(shop.updatedAt)}
-                      </td>
-                      <td className="px-4 py-4 align-top">
-                        <div className="flex flex-wrap gap-2">
-                          <Button size="sm" variant="outline" asChild>
-                            <Link href={`/admin/shops/${shop.id}/edit`}>
-                              Edit
-                            </Link>
-                          </Button>
-                          <form
-                            action={toggleShopApproval.bind(
-                              null,
-                              shop.id,
-                              !shop.approved
-                            )}
-                          >
-                            <Button size="sm" variant="outline">
-                              {shop.approved ? "Unapprove" : "Approve"}
-                            </Button>
-                          </form>
-                          <form action={deleteShop.bind(null, shop.id)}>
-                            <Button size="sm" variant="destructive">
-                              Delete
-                            </Button>
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-12 text-center text-muted-foreground"
-                    >
-                      No shops yet. Add the first shop to publish listings.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <ShopsTable shops={shopRows} />
 
           <div className="flex flex-col gap-3 border-t border-border p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-muted-foreground">

@@ -207,6 +207,45 @@ export async function deleteShop(id: string, formData?: FormData) {
   revalidatePublicShopPages()
 }
 
+export async function bulkSetShopApproval(ids: string[], approved: boolean) {
+  await requireAdminSession()
+
+  if (ids.length === 0) {
+    return
+  }
+
+  await prisma.shop.updateMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+    data: {
+      approved,
+    },
+  })
+
+  revalidatePublicShopPages()
+}
+
+export async function bulkDeleteShops(ids: string[]) {
+  await requireAdminSession()
+
+  if (ids.length === 0) {
+    return
+  }
+
+  await prisma.shop.deleteMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+  })
+
+  revalidatePublicShopPages()
+}
+
 export async function importShops(formData: FormData) {
   await requireAdminSession()
 
