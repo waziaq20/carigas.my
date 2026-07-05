@@ -80,6 +80,7 @@ export async function findShopsByName(params: {
   const existing = await prisma.shop.findMany({
     where: {
       name: { equals: params.name, mode: "insensitive" },
+      deletedAt: null,
     },
   })
 

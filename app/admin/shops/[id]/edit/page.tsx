@@ -15,10 +15,8 @@ export default async function EditShopPage({ params }: EditShopPageProps) {
   await requireAdminSession()
 
   const { id } = await params
-  const shop = await prisma.shop.findUnique({
-    where: {
-      id,
-    },
+  const shop = await prisma.shop.findFirst({
+    where: { id, deletedAt: null },
   })
 
   if (!shop) {

@@ -115,6 +115,18 @@ function assignOptionalFields(
       errors.push("submittedBy must be a string or null")
     }
   }
+
+  if ("openHours" in body) {
+    if (body.openHours === null) {
+      data.openHours = null
+    } else if (typeof body.openHours === "string") {
+      const trimmed = body.openHours.trim()
+
+      data.openHours = trimmed === "" ? null : trimmed
+    } else {
+      errors.push("openHours must be a string or null")
+    }
+  }
 }
 
 export function parseShopCreateInput(

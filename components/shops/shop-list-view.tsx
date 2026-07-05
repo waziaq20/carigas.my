@@ -1,6 +1,6 @@
 "use client"
 
-import { useDeferredValue, useMemo, useState } from "react"
+import { useDeferredValue, useEffect, useMemo, useState } from "react"
 
 import {
   CylinderIcon,
@@ -10,6 +10,7 @@ import {
   XIcon,
 } from "@/components/icons/app-icons"
 import type { Dictionary } from "@/lib/i18n"
+import { getFavorites } from "@/lib/favorites"
 import { cn } from "@/lib/utils"
 import type { UiShop } from "@/types"
 
@@ -19,6 +20,7 @@ import { ShopCard } from "./shop-card"
 
 type ShopListViewProps = {
   dictionary: Dictionary
+  locale: string
   shops: UiShop[]
 }
 
@@ -30,8 +32,10 @@ type FilterConfig = {
   icon: React.ReactNode
 }
 
-export function ShopListView({ dictionary, shops }: ShopListViewProps) {
+export function ShopListView({ dictionary, locale, shops }: ShopListViewProps) {
   const [searchText, setSearchText] = useState("")
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set())
   const [filters, setFilters] = useState<Record<FilterKey, boolean>>({
     exchange: false,
     newCylinder: false,
@@ -40,11 +44,29 @@ export function ShopListView({ dictionary, shops }: ShopListViewProps) {
 
   const deferredSearchText = useDeferredValue(searchText)
 
+  useEffect(() => {
+    if (!showFavoritesOnly) {
+      return
+    }
+
+    function refreshFavorites() {
+      setFavoriteIds(new Set(getFavorites()))
+    }
+
+    refreshFavorites()
+    window.addEventListener("carigas:favorites-changed", refreshFavorites)
+
+    return () => {
+      window.removeEventListener("carigas:favorites-changed", refreshFavorites)
+    }
+  }, [showFavoritesOnly])
+
   const hasActiveFilters =
     deferredSearchText.trim() !== "" ||
     filters.exchange ||
     filters.newCylinder ||
-    filters.hasPhone
+    filters.hasPhone ||
+    showFavoritesOnly
 
   const filteredShops = useMemo(() => {
     const query = deferredSearchText.trim().toLowerCase()
@@ -71,9 +93,13 @@ export function ShopListView({ dictionary, shops }: ShopListViewProps) {
         return false
       }
 
+      if (showFavoritesOnly && !favoriteIds.has(shop.id)) {
+        return false
+      }
+
       return true
     })
-  }, [shops, deferredSearchText, filters])
+  }, [shops, deferredSearchText, filters, showFavoritesOnly, favoriteIds])
 
   function toggleFilter(key: FilterKey) {
     setFilters((prev) => ({
@@ -84,6 +110,7 @@ export function ShopListView({ dictionary, shops }: ShopListViewProps) {
 
   function clearAllFilters() {
     setSearchText("")
+    setShowFavoritesOnly(false)
     setFilters({
       exchange: false,
       newCylinder: false,
@@ -167,6 +194,28 @@ export function ShopListView({ dictionary, shops }: ShopListViewProps) {
               {dictionary.clearFilters}
             </button>
           ) : null}
+          <button
+            type="button"
+            onClick={() => setShowFavoritesOnly((prev) => !prev)}
+            aria-pressed={showFavoritesOnly}
+            className={cn(
+              "inline-flex h-8 items-center gap-1.5 border px-3 text-xs font-black transition",
+              showFavoritesOnly
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-3.5"
+              fill={showFavoritesOnly ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            {dictionary.showFavoritesOnly}
+          </button>
         </div>
       </div>
 
@@ -187,9 +236,13 @@ export function ShopListView({ dictionary, shops }: ShopListViewProps) {
       <div className="flex-1 overflow-y-auto p-3 sm:p-4">
         <div className="grid gap-3">
           {shops.length === 0 ? (
-            <EmptyShopsState dictionary={dictionary} />
+            <EmptyShopsState dictionary={dictionary} locale={locale} />
           ) : filteredShops.length === 0 ? (
-            <NoResultsState dictionary={dictionary} onClear={clearAllFilters} />
+            <NoResultsState
+              dictionary={dictionary}
+              locale={locale}
+              onClear={clearAllFilters}
+            />
           ) : (
             filteredShops.map((shop) => (
               <ShopCard key={shop.id} dictionary={dictionary} shop={shop} />

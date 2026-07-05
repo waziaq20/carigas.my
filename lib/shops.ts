@@ -49,6 +49,7 @@ export function mapShopToUiShop(
     lng: shop.lng,
     top: `${clamp(top, 12, 88).toFixed(1)}%`,
     left: `${clamp(left, 12, 88).toFixed(1)}%`,
+    openHours: shop.openHours,
   }
 }
 

@@ -36,15 +36,53 @@ function createCapabilityIcon(active: boolean, path: string) {
   }" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="${path}" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg></span>`
 }
 
-function createShopIcon(shop: UiShop, selected: boolean) {
+function getMedianPrice(shops: UiShop[]): number | null {
+  const prices = shops
+    .map((s) => s.priceValue)
+    .filter((p): p is number => p !== null)
+    .sort((a, b) => a - b)
+
+  if (prices.length === 0) {
+    return null
+  }
+
+  const mid = Math.floor(prices.length / 2)
+
+  return prices.length % 2
+    ? prices[mid]
+    : Math.round((prices[mid - 1] + prices[mid]) / 2)
+}
+
+function getPriceTierClass(shop: UiShop, median: number | null): string {
+  if (!shop.priceValue || median === null) {
+    return ""
+  }
+
+  if (shop.priceValue <= median) {
+    return " is-price-low"
+  }
+
+  if (shop.priceValue <= median * 1.1) {
+    return " is-price-mid"
+  }
+
+  return " is-price-high"
+}
+
+function createShopIcon(
+  shop: UiShop,
+  selected: boolean,
+  medianPrice: number | null
+) {
   const selectedClass = selected ? " is-selected" : ""
+  const priceTierClass = getPriceTierClass(shop, medianPrice)
   const priceBadge = shop.price
     ? `<span class="carigas-shop-marker__price">${shop.price}</span>`
     : ""
 
   return L.divIcon({
     className: "",
-    html: `<div class="carigas-shop-marker${selectedClass}">
+    html: `<div class="carigas-shop-marker${selectedClass}${priceTierClass}">
       ${priceBadge}
       <span class="carigas-shop-marker__pin" aria-hidden="true">
         <span class="carigas-shop-marker__flame"></span>
@@ -101,6 +139,8 @@ export default function ShopMap({
   shops,
   userLocation,
 }: ShopMapProps) {
+  const medianPrice = getMedianPrice(shops)
+
   return (
     <MapContainer
       center={getMapCenter(shops)}
@@ -134,7 +174,7 @@ export default function ShopMap({
           eventHandlers={{
             click: () => onSelectShop(shop),
           }}
-          icon={createShopIcon(shop, selectedShop?.id === shop.id)}
+          icon={createShopIcon(shop, selectedShop?.id === shop.id, medianPrice)}
           position={[shop.lat, shop.lng]}
           title={shop.name}
         />

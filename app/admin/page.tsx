@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { logoutAdmin } from "@/app/admin/actions"
+import { ShopsFilter } from "@/components/admin/shops-filter"
 import { ShopsTable } from "@/components/admin/shops-table"
 import type { ShopTableRow } from "@/components/admin/shops-table"
 import { GasIcon } from "@/components/icons/app-icons"
@@ -21,9 +22,20 @@ function formatDate(date: Date) {
 
 const shopsPerPage = 20
 
+type ShopFilters = {
+  search: string
+  status: string
+  hasPrice: string
+  hasPhone: string
+}
+
 type AdminPageProps = {
   searchParams: Promise<{
     page?: string
+    search?: string
+    status?: string
+    hasPrice?: string
+    hasPhone?: string
   }>
 }
 
@@ -37,33 +49,93 @@ function getCurrentPage(page: string | undefined) {
   return pageNumber
 }
 
-function getAdminPageHref(page: number) {
-  return page === 1 ? "/admin" : `/admin?page=${page}`
+function buildWhere(filters: ShopFilters) {
+  return {
+    deletedAt: null,
+    ...(filters.search
+      ? {
+          OR: [
+            {
+              name: {
+                contains: filters.search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              address: {
+                contains: filters.search,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        }
+      : {}),
+    ...(filters.status === "pending" ? { approved: false } : {}),
+    ...(filters.status === "approved" ? { approved: true } : {}),
+    ...(filters.hasPrice === "yes" ? { price: { not: null } } : {}),
+    ...(filters.hasPrice === "no" ? { price: null } : {}),
+    ...(filters.hasPhone === "yes" ? { phone: { not: null } } : {}),
+    ...(filters.hasPhone === "no" ? { phone: null } : {}),
+  }
+}
+
+function buildAdminHref(page: number, filters: ShopFilters) {
+  const params = new URLSearchParams()
+
+  if (page > 1) params.set("page", String(page))
+  if (filters.search) params.set("search", filters.search)
+  if (filters.status !== "all") params.set("status", filters.status)
+  if (filters.hasPrice !== "all") params.set("hasPrice", filters.hasPrice)
+  if (filters.hasPhone !== "all") params.set("hasPhone", filters.hasPhone)
+
+  const qs = params.toString()
+
+  return qs ? `/admin?${qs}` : "/admin"
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const session = await requireAdminSession()
-  const { page } = await searchParams
+  const {
+    page,
+    search = "",
+    status = "all",
+    hasPrice = "all",
+    hasPhone = "all",
+  } = await searchParams
+
+  const filters: ShopFilters = { search, status, hasPrice, hasPhone }
+  const where = buildWhere(filters)
   const currentPage = getCurrentPage(page)
-  const [totalCount, approvedCount, pricedCount] = await Promise.all([
-    prisma.shop.count(),
-    prisma.shop.count({
-      where: {
-        approved: true,
-      },
-    }),
-    prisma.shop.count({
-      where: {
-        price: {
-          not: null,
+
+  const [stats, filteredCount] = await Promise.all([
+    Promise.all([
+      prisma.shop.count({
+        where: { deletedAt: null },
+      }),
+      prisma.shop.count({
+        where: {
+          approved: true,
+          deletedAt: null,
         },
-      },
-    }),
+      }),
+      prisma.shop.count({
+        where: {
+          price: {
+            not: null,
+          },
+          deletedAt: null,
+        },
+      }),
+    ]),
+    prisma.shop.count({ where }),
   ])
+
+  const [totalCount, approvedCount, pricedCount] = stats
   const pendingCount = totalCount - approvedCount
-  const totalPages = Math.max(1, Math.ceil(totalCount / shopsPerPage))
+  const totalPages = Math.max(1, Math.ceil(filteredCount / shopsPerPage))
   const boundedCurrentPage = Math.min(currentPage, totalPages)
   const shops = await prisma.shop.findMany({
+    where,
     orderBy: [
       {
         approved: "asc",
@@ -76,8 +148,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     take: shopsPerPage,
   })
   const firstShopIndex =
-    totalCount === 0 ? 0 : (boundedCurrentPage - 1) * shopsPerPage + 1
-  const lastShopIndex = Math.min(boundedCurrentPage * shopsPerPage, totalCount)
+    filteredCount === 0 ? 0 : (boundedCurrentPage - 1) * shopsPerPage + 1
+  const lastShopIndex = Math.min(
+    boundedCurrentPage * shopsPerPage,
+    filteredCount
+  )
   const shopRows: ShopTableRow[] = shops.map((shop) => ({
     id: shop.id,
     name: shop.name,
@@ -90,6 +165,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     priceLabel: formatShopPrice(shop.price) ?? "-",
     approved: shop.approved,
     updatedAtLabel: formatDate(shop.updatedAt),
+    updatedAtIso: shop.updatedAt.toISOString(),
   }))
 
   return (
@@ -113,6 +189,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             </span>
             <Button variant="outline" asChild>
               <Link href="/admin/shops/import">Import / export</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/admin/shops/duplicates">Duplicates</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/admin/audit-log">Audit log</Link>
             </Button>
             <Button asChild>
               <Link href="/admin/shops/new">Add shop</Link>
@@ -155,16 +237,29 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             <div>
               <h1 className="text-xl font-black tracking-[-0.05em]">
                 Manage shops
+                {pendingCount > 0 ? (
+                  <span className="ml-2 inline-flex items-center border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
+                    {pendingCount} pending
+                  </span>
+                ) : null}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Showing {firstShopIndex}-{lastShopIndex} of {totalCount} shops.
-                Only approved shops appear on the public map and list.
+                Showing {firstShopIndex}-{lastShopIndex} of {filteredCount} shop
+                {filteredCount === 1 ? "" : "s"}. Only approved shops appear on
+                the public map and list.
               </p>
             </div>
             <Button variant="outline" asChild>
               <Link href="/">View public site</Link>
             </Button>
           </div>
+
+          <ShopsFilter
+            search={search}
+            status={status}
+            hasPrice={hasPrice}
+            hasPhone={hasPhone}
+          />
 
           <ShopsTable shops={shopRows} />
 
@@ -179,7 +274,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 asChild={boundedCurrentPage > 1}
               >
                 {boundedCurrentPage > 1 ? (
-                  <Link href={getAdminPageHref(boundedCurrentPage - 1)}>
+                  <Link href={buildAdminHref(boundedCurrentPage - 1, filters)}>
                     Previous
                   </Link>
                 ) : (
@@ -192,7 +287,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 asChild={boundedCurrentPage < totalPages}
               >
                 {boundedCurrentPage < totalPages ? (
-                  <Link href={getAdminPageHref(boundedCurrentPage + 1)}>
+                  <Link href={buildAdminHref(boundedCurrentPage + 1, filters)}>
                     Next
                   </Link>
                 ) : (

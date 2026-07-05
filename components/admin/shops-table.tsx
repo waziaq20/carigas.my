@@ -23,10 +23,17 @@ export type ShopTableRow = {
   priceLabel: string
   approved: boolean
   updatedAtLabel: string
+  updatedAtIso: string
 }
 
 type ShopsTableProps = {
   shops: ShopTableRow[]
+}
+
+const staleThresholdMs = 30 * 24 * 60 * 60 * 1000
+
+function isStale(updatedAtIso: string) {
+  return Date.now() - new Date(updatedAtIso).getTime() > staleThresholdMs
 }
 
 export function ShopsTable({ shops }: ShopsTableProps) {
@@ -205,6 +212,9 @@ export function ShopsTable({ shops }: ShopsTableProps) {
                   </td>
                   <td className="px-4 py-4 align-top text-xs text-muted-foreground">
                     {shop.updatedAtLabel}
+                    {isStale(shop.updatedAtIso) ? (
+                      <span className="ml-1 text-destructive/70">· stale</span>
+                    ) : null}
                   </td>
                   <td className="px-4 py-4 align-top">
                     <div className="flex flex-wrap gap-2">

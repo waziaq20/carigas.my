@@ -46,3 +46,13 @@ export { Prisma }
  * 
  */
 export type Shop = Prisma.ShopModel
+/**
+ * Model PriceHistory
+ * 
+ */
+export type PriceHistory = Prisma.PriceHistoryModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel

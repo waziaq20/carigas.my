@@ -184,6 +184,7 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
                 <ShopMapView
                   dictionary={dictionary}
                   isLocating={isLocating}
+                  locale={locale}
                   locationError={locationError}
                   onLocate={handleLocate}
                   selectedShop={selectedShop}
@@ -192,7 +193,11 @@ export function HomePage({ dictionary, initialShops, locale }: HomePageProps) {
                   onSelectShop={setSelectedShop}
                 />
               ) : (
-                <ShopListView dictionary={dictionary} shops={shops} />
+                <ShopListView
+                  dictionary={dictionary}
+                  locale={locale}
+                  shops={shops}
+                />
               )}
             </div>
           </div>

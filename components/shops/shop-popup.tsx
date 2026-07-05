@@ -1,3 +1,7 @@
+"use client"
+
+import { useEffect, useState, useSyncExternalStore } from "react"
+
 import {
   CylinderIcon,
   ExchangeIcon,
@@ -5,18 +9,65 @@ import {
 } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
+import { isFavorite, toggleFavorite } from "@/lib/favorites"
 import { getGoogleMapsDirectionsUrl } from "@/lib/maps"
+import { isShopOpenNow } from "@/lib/operating-hours"
 import { formatMalaysianPhoneDisplay } from "@/lib/phone"
 import type { UiShop } from "@/types"
 
 import { AvailabilityBadge } from "./availability-badge"
+import { PriceSparkline } from "./price-sparkline"
+
+type PricePoint = {
+  price: number
+  createdAt: string
+}
 
 type ShopPopupProps = {
   dictionary: Dictionary
   shop: UiShop
 }
 
+function subscribeFavorites(callback: () => void) {
+  window.addEventListener("carigas:favorites-changed", callback)
+  return () => window.removeEventListener("carigas:favorites-changed", callback)
+}
+
 export function ShopPopup({ dictionary, shop }: ShopPopupProps) {
+  const isFav = useSyncExternalStore(
+    subscribeFavorites,
+    () => isFavorite(shop.id),
+    () => false
+  )
+  const [priceHistory, setPriceHistory] = useState<PricePoint[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetch(`/api/shops/${shop.id}/price-history`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && Array.isArray(data.history)) {
+          setPriceHistory(data.history)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPriceHistory([])
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [shop.id])
+
+  function handleToggleFavorite() {
+    toggleFavorite(shop.id)
+  }
+
+  const isOpen = shop.openHours ? isShopOpenNow(shop.openHours) : null
+
   return (
     <article className="border border-border bg-card p-4 text-card-foreground shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -28,9 +79,39 @@ export function ShopPopup({ dictionary, shop }: ShopPopupProps) {
             {shop.address}
           </p>
         </div>
-        <span className="bg-secondary px-2.5 py-1 text-xs font-black text-secondary-foreground">
-          {shop.distance}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          {isOpen !== null ? (
+            <span
+              className={
+                isOpen
+                  ? "text-xs font-bold text-green-600"
+                  : "text-xs font-bold text-muted-foreground"
+              }
+            >
+              {isOpen ? dictionary.openNow : dictionary.closed}
+            </span>
+          ) : null}
+          <span className="bg-secondary px-2.5 py-1 text-xs font-black text-secondary-foreground">
+            {shop.distance}
+          </span>
+          <button
+            type="button"
+            onClick={handleToggleFavorite}
+            className="text-muted-foreground transition hover:text-foreground"
+            aria-label={dictionary.favorites}
+            aria-pressed={isFav}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-5"
+              fill={isFav ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -56,6 +137,14 @@ export function ShopPopup({ dictionary, shop }: ShopPopupProps) {
           <p className="mt-1 text-lg font-black text-foreground">
             {shop.price ?? dictionary.unknownPrice}
           </p>
+          {priceHistory.length >= 2 ? (
+            <div className="mt-1">
+              <PriceSparkline
+                data={priceHistory}
+                label={dictionary.priceHistory}
+              />
+            </div>
+          ) : null}
         </div>
         <div className="flex gap-2">
           {shop.phone ? (

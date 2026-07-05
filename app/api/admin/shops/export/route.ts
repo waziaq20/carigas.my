@@ -14,6 +14,7 @@ export async function GET() {
   await requireAdminSession()
 
   const shops = await prisma.shop.findMany({
+    where: { deletedAt: null },
     orderBy: [{ name: "asc" }],
   })
 

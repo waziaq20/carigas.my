@@ -18,9 +18,11 @@ import {
   isLoginRateLimited,
   recordFailedLogin,
 } from "@/lib/admin-rate-limit"
+import { recordAudit } from "@/lib/audit-log"
 import { locales } from "@/lib/i18n"
 import { normalizeMalaysianPhone } from "@/lib/phone"
 import { prisma } from "@/lib/prisma"
+import { snapshotPriceIfChanged } from "@/lib/price-history"
 import { parseShopsFromCsv } from "@/lib/shop-csv"
 import type { ShopCreateData } from "@/types"
 
@@ -96,6 +98,7 @@ function getShopData(formData: FormData): AdminShopData {
     lat: getRequiredNumber(formData, "lat"),
     lng: getRequiredNumber(formData, "lng"),
     name: getRequiredText(formData, "name"),
+    openHours: getText(formData, "openHours") || null,
     phone: getNormalizedPhone(formData),
     price: getPriceInSen(formData),
     sellNew: formData.get("sellNew") === "on",
@@ -148,10 +151,16 @@ export async function logoutAdmin() {
 }
 
 export async function createShop(formData: FormData) {
-  await requireAdminSession()
+  const session = await requireAdminSession()
 
-  await prisma.shop.create({
+  const shop = await prisma.shop.create({
     data: getShopData(formData),
+  })
+
+  await recordAudit({
+    actor: session.username,
+    action: "create",
+    shopId: shop.id,
   })
 
   revalidatePublicShopPages()
@@ -159,13 +168,29 @@ export async function createShop(formData: FormData) {
 }
 
 export async function updateShop(id: string, formData: FormData) {
-  await requireAdminSession()
+  const session = await requireAdminSession()
+
+  const existing = await prisma.shop.findFirst({
+    where: { id, deletedAt: null },
+  })
+
+  if (!existing) {
+    redirect(adminHomePath)
+  }
+
+  const data = getShopData(formData)
+
+  await snapshotPriceIfChanged(id, existing.price, data.price ?? null)
 
   await prisma.shop.update({
-    where: {
-      id,
-    },
-    data: getShopData(formData),
+    where: { id },
+    data,
+  })
+
+  await recordAudit({
+    actor: session.username,
+    action: "update",
+    shopId: id,
   })
 
   revalidatePublicShopPages()
@@ -179,16 +204,20 @@ export async function toggleShopApproval(
 ) {
   void formData
 
-  await requireAdminSession()
+  const session = await requireAdminSession()
 
-  await prisma.shop.update({
-    where: {
-      id,
-    },
-    data: {
-      approved,
-    },
+  const result = await prisma.shop.updateMany({
+    where: { id, deletedAt: null },
+    data: { approved },
   })
+
+  if (result.count > 0) {
+    await recordAudit({
+      actor: session.username,
+      action: approved ? "approve" : "unapprove",
+      shopId: id,
+    })
+  }
 
   revalidatePublicShopPages()
 }
@@ -196,58 +225,78 @@ export async function toggleShopApproval(
 export async function deleteShop(id: string, formData?: FormData) {
   void formData
 
-  await requireAdminSession()
+  const session = await requireAdminSession()
 
-  await prisma.shop.delete({
-    where: {
-      id,
-    },
+  const result = await prisma.shop.updateMany({
+    where: { id, deletedAt: null },
+    data: { deletedAt: new Date() },
   })
+
+  if (result.count > 0) {
+    await recordAudit({
+      actor: session.username,
+      action: "delete",
+      shopId: id,
+    })
+  }
 
   revalidatePublicShopPages()
 }
 
 export async function bulkSetShopApproval(ids: string[], approved: boolean) {
-  await requireAdminSession()
+  const session = await requireAdminSession()
 
   if (ids.length === 0) {
     return
   }
 
-  await prisma.shop.updateMany({
+  const result = await prisma.shop.updateMany({
     where: {
-      id: {
-        in: ids,
-      },
+      id: { in: ids },
+      deletedAt: null,
     },
-    data: {
-      approved,
-    },
+    data: { approved },
   })
+
+  if (result.count > 0) {
+    await recordAudit({
+      actor: session.username,
+      action: approved ? "bulk_approve" : "bulk_unapprove",
+      details: JSON.stringify({ ids, affected: result.count }),
+    })
+  }
 
   revalidatePublicShopPages()
 }
 
 export async function bulkDeleteShops(ids: string[]) {
-  await requireAdminSession()
+  const session = await requireAdminSession()
 
   if (ids.length === 0) {
     return
   }
 
-  await prisma.shop.deleteMany({
+  const result = await prisma.shop.updateMany({
     where: {
-      id: {
-        in: ids,
-      },
+      id: { in: ids },
+      deletedAt: null,
     },
+    data: { deletedAt: new Date() },
   })
+
+  if (result.count > 0) {
+    await recordAudit({
+      actor: session.username,
+      action: "bulk_delete",
+      details: JSON.stringify({ ids, affected: result.count }),
+    })
+  }
 
   revalidatePublicShopPages()
 }
 
 export async function importShops(formData: FormData) {
-  await requireAdminSession()
+  const session = await requireAdminSession()
 
   const file = formData.get("file")
 
@@ -268,6 +317,12 @@ export async function importShops(formData: FormData) {
   }
 
   if (created > 0) {
+    await recordAudit({
+      actor: session.username,
+      action: "import",
+      details: JSON.stringify({ created, skipped: errors.length }),
+    })
+
     revalidatePublicShopPages()
   }
 

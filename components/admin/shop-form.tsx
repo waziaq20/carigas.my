@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { OperatingHoursInput } from "@/components/admin/operating-hours-input"
 import { PhoneInput } from "@/components/admin/phone-input"
 import { ShopLocationPicker } from "@/components/admin/shop-location-picker"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,7 @@ type EditableShop = {
   lat: number
   lng: number
   name: string
+  openHours: string | null
   phone: string | null
   price: number | null
   sellNew: boolean
@@ -119,6 +121,10 @@ export function ShopForm({ action, cta, shop, title }: ShopFormProps) {
           />
           Approved for public listing
         </label>
+      </div>
+
+      <div className="mt-5 border-t border-border pt-5">
+        <OperatingHoursInput defaultValue={shop?.openHours} />
       </div>
 
       <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">

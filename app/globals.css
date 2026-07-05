@@ -252,6 +252,27 @@
     transform: translateX(-50%) rotate(-45deg) scale(1.08);
   }
 
+  .carigas-shop-marker.is-price-low .carigas-shop-marker__pin {
+    background: #22c55e;
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 4px #22c55e;
+  }
+
+  .carigas-shop-marker.is-price-mid .carigas-shop-marker__pin {
+    background: #f59e0b;
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 4px #f59e0b;
+  }
+
+  .carigas-shop-marker.is-price-high .carigas-shop-marker__pin {
+    background: #ef4444;
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 4px #ef4444;
+  }
+
   .carigas-shop-marker__flame {
     width: 13px;
     height: 17px;

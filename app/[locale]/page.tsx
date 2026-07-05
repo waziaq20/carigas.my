@@ -135,6 +135,7 @@ export default async function Page({
   const shops = await prisma.shop.findMany({
     where: {
       approved: true,
+      deletedAt: null,
     },
     orderBy: {
       name: "asc",

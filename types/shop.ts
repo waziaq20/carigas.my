@@ -14,6 +14,7 @@ export type ShopRecord = {
   price: number | null
   phone: string | null
   submittedBy: string | null
+  openHours: string | null
 }
 
 export type ShopCreateData = {
@@ -26,6 +27,7 @@ export type ShopCreateData = {
   price?: number | null
   phone?: string | null
   submittedBy?: string | null
+  openHours?: string | null
 }
 
 export type ShopUpdateData = Partial<ShopCreateData> & {
@@ -46,4 +48,5 @@ export type UiShop = {
   lng: number
   top: string
   left: string
+  openHours?: string | null
 }

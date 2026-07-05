@@ -16,6 +16,7 @@ const ShopMap = dynamic(() => import("@/components/shop-map"), {
 type ShopMapViewProps = {
   dictionary: Dictionary
   isLocating: boolean
+  locale: string
   locationError: string | null
   onLocate: () => void
   shops: UiShop[]
@@ -38,6 +39,7 @@ function MapLoadingState() {
 export function ShopMapView({
   dictionary,
   isLocating,
+  locale,
   locationError,
   onLocate,
   shops,
@@ -46,7 +48,7 @@ export function ShopMapView({
   onSelectShop,
 }: ShopMapViewProps) {
   if (shops.length === 0 || !selectedShop) {
-    return <EmptyShopsState dictionary={dictionary} />
+    return <EmptyShopsState dictionary={dictionary} locale={locale} />
   }
 
   return (

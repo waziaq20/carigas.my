@@ -1,4 +1,9 @@
-import { requireAdminRequest, requireSameOriginRequest } from "@/lib/admin-auth"
+import {
+  getAdminSessionFromRequest,
+  requireAdminRequest,
+  requireSameOriginRequest,
+} from "@/lib/admin-auth"
+import { recordAudit } from "@/lib/audit-log"
 import { defaultLocale, getDictionary, isLocale } from "@/lib/i18n"
 import { prisma } from "@/lib/prisma"
 import { mapShopToUiShop, sortShopsByDistance } from "@/lib/shops"
@@ -29,6 +34,7 @@ export async function GET(request: Request) {
     const shops = await prisma.shop.findMany({
       where: {
         approved: true,
+        deletedAt: null,
       },
       orderBy: {
         name: "asc",
@@ -88,6 +94,13 @@ export async function POST(request: Request) {
   try {
     const shop = await prisma.shop.create({
       data: result.data,
+    })
+
+    const session = getAdminSessionFromRequest(request)
+    await recordAudit({
+      actor: session?.username ?? "unknown",
+      action: "create",
+      shopId: shop.id,
     })
 
     return Response.json({ shop }, { status: 201 })

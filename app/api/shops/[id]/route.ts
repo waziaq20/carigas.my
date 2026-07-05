@@ -1,5 +1,11 @@
-import { requireAdminRequest, requireSameOriginRequest } from "@/lib/admin-auth"
+import {
+  getAdminSessionFromRequest,
+  requireAdminRequest,
+  requireSameOriginRequest,
+} from "@/lib/admin-auth"
+import { recordAudit } from "@/lib/audit-log"
 import { prisma } from "@/lib/prisma"
+import { snapshotPriceIfChanged } from "@/lib/price-history"
 
 import { parseShopUpdateInput } from "../validation"
 
@@ -17,6 +23,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       where: {
         id,
         approved: true,
+        deletedAt: null,
       },
     })
 
@@ -70,21 +77,30 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   try {
-    const existingShop = await prisma.shop.findUnique({
-      where: {
-        id,
-      },
+    const existingShop = await prisma.shop.findFirst({
+      where: { id, deletedAt: null },
     })
 
     if (!existingShop) {
       return Response.json({ error: "Shop not found" }, { status: 404 })
     }
 
+    await snapshotPriceIfChanged(
+      id,
+      existingShop.price,
+      result.data.price ?? null
+    )
+
     const shop = await prisma.shop.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: result.data,
+    })
+
+    const session = getAdminSessionFromRequest(request)
+    await recordAudit({
+      actor: session?.username ?? "unknown",
+      action: "update",
+      shopId: id,
     })
 
     return Response.json({ shop })
@@ -111,20 +127,24 @@ export async function DELETE(request: Request, { params }: RouteContext) {
   const { id } = await params
 
   try {
-    const existingShop = await prisma.shop.findUnique({
-      where: {
-        id,
-      },
+    const existingShop = await prisma.shop.findFirst({
+      where: { id, deletedAt: null },
     })
 
     if (!existingShop) {
       return Response.json({ error: "Shop not found" }, { status: 404 })
     }
 
-    await prisma.shop.delete({
-      where: {
-        id,
-      },
+    await prisma.shop.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    })
+
+    const session = getAdminSessionFromRequest(request)
+    await recordAudit({
+      actor: session?.username ?? "unknown",
+      action: "delete",
+      shopId: id,
     })
 
     return new Response(null, { status: 204 })

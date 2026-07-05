@@ -1,14 +1,20 @@
+import Link from "next/link"
+
 import { SearchIcon } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
-import { addShopFormUrl } from "@/lib/links"
 
 type NoResultsStateProps = {
   dictionary: Dictionary
+  locale: string
   onClear: () => void
 }
 
-export function NoResultsState({ dictionary, onClear }: NoResultsStateProps) {
+export function NoResultsState({
+  dictionary,
+  locale,
+  onClear,
+}: NoResultsStateProps) {
   return (
     <div className="grid min-h-72 place-items-center p-6">
       <div className="max-w-sm border border-dashed border-border bg-card p-6 text-center text-card-foreground shadow-sm">
@@ -30,9 +36,7 @@ export function NoResultsState({ dictionary, onClear }: NoResultsStateProps) {
             {dictionary.clearFilters}
           </Button>
           <Button className="px-4" asChild>
-            <a href={addShopFormUrl} target="_blank" rel="noopener noreferrer">
-              {dictionary.addShop}
-            </a>
+            <Link href={`/${locale}/submit`}>{dictionary.addShop}</Link>
           </Button>
         </div>
       </div>

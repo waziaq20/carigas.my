@@ -1,12 +1,14 @@
+import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
 import type { Dictionary } from "@/lib/i18n"
-import { addShopFormUrl } from "@/lib/links"
 
 type EmptyShopsStateProps = {
   dictionary: Dictionary
+  locale: string
 }
 
-export function EmptyShopsState({ dictionary }: EmptyShopsStateProps) {
+export function EmptyShopsState({ dictionary, locale }: EmptyShopsStateProps) {
   return (
     <div className="grid h-full min-h-80 place-items-center bg-muted/40 p-6">
       <div className="max-w-sm border border-dashed border-border bg-card p-5 text-center text-card-foreground shadow-sm">
@@ -17,9 +19,7 @@ export function EmptyShopsState({ dictionary }: EmptyShopsStateProps) {
           {dictionary.emptyDescription}
         </p>
         <Button className="mt-4 px-4" asChild>
-          <a href={addShopFormUrl} target="_blank" rel="noopener noreferrer">
-            {dictionary.addShop}
-          </a>
+          <Link href={`/${locale}/submit`}>{dictionary.addShop}</Link>
         </Button>
       </div>
     </div>
