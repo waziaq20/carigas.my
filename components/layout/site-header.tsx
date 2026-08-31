@@ -44,6 +44,13 @@ export function SiteHeader({
         <Button
           variant="outline"
           className="hidden px-3 sm:inline-flex"
+          asChild
+        >
+          <Link href={`/${locale}/my-gas`}>{dictionary.myGas.title}</Link>
+        </Button>
+        <Button
+          variant="outline"
+          className="hidden px-3 sm:inline-flex"
           disabled={isLocating}
           onClick={onLocate}
         >

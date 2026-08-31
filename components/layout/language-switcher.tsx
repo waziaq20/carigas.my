@@ -4,11 +4,13 @@ import { localeLabels, locales, type Dictionary, type Locale } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 type LanguageSwitcherProps = {
+  basePath?: string
   dictionary: Dictionary
   locale: Locale
 }
 
 export function LanguageSwitcher({
+  basePath = "",
   dictionary,
   locale,
 }: LanguageSwitcherProps) {
@@ -20,7 +22,7 @@ export function LanguageSwitcher({
       {locales.map((targetLocale) => (
         <Link
           key={targetLocale}
-          href={`/${targetLocale}`}
+          href={`/${targetLocale}${basePath}`}
           hrefLang={targetLocale}
           className={cn(
             "px-2.5 py-2 transition hover:bg-background hover:text-foreground",

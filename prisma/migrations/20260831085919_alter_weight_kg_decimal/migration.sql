@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "GasRecord" ALTER COLUMN "weightKg" SET DATA TYPE DOUBLE PRECISION;
