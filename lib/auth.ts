@@ -8,6 +8,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [Google],
   session: { strategy: "jwt" },
+  trustHost: true,
   callbacks: {
     session({ session, token }) {
       if (session.user) {
